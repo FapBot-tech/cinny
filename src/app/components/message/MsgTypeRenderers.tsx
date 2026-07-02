@@ -1,6 +1,8 @@
 import React, { CSSProperties, ReactNode } from 'react';
 import { Box, Chip, Icon, Icons, Text, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
+import { useSetting } from '../../state/hooks/settings';
+import { settingsAtom } from '../../state/settings';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
@@ -11,6 +13,7 @@ import {
   MessageEditedContent,
   MessageUnsupportedContent,
 } from './content';
+import { Video } from '../media/Video';
 import {
   IAudioContent,
   IAudioInfo,
@@ -76,13 +79,19 @@ type MTextProps = {
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
 };
+const VIDEO_URL_REG = /https?:\/\/[^\s]+\.(mp4|webm)(\?[^\s]*)?/gi;
 export function MText({ edited, content, renderBody, renderUrlsPreview, style }: MTextProps) {
+  const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const { body, formatted_body: customBody } = content;
 
   if (typeof body !== 'string') return <BrokenContent />;
   const trimmedBody = trimReplyFromBody(body);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
+
+  // Find .mp4/.webm URLs
+  const videoUrls = trimmedBody.match(VIDEO_URL_REG);
+  const hasMedia = videoUrls && videoUrls.length > 0;
 
   return (
     <>
@@ -97,7 +106,32 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
         })}
         {edited && <MessageEditedContent />}
       </MessageTextBody>
-      {renderUrlsPreview && urls && urls.length > 0 && renderUrlsPreview(urls)}
+      {/* Only show URL previews if there are URLs and no video URLs */}
+      {renderUrlsPreview && urls && urls.length > 0 && !hasMedia && renderUrlsPreview(urls)}
+      {mediaAutoLoad && videoUrls && videoUrls.length > 0 && (
+        <>
+          {videoUrls.map((url, idx) => (
+            <Video
+              key={url + idx}
+              title="video"
+              src={url}
+              controls
+              autoPlay
+              loop
+              muted
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                maxHeight: 'clamp(250px, 30vh, 40vh)',
+                marginTop: '0.5em',
+                borderRadius: '8px',
+                display: 'block',
+                background: '#000',
+              }}
+            />
+          ))}
+        </>
+      )}
     </>
   );
 }
@@ -116,12 +150,17 @@ export function MEmote({
   renderBody,
   renderUrlsPreview,
 }: MEmoteProps) {
+  const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const { body, formatted_body: customBody } = content;
 
   if (typeof body !== 'string') return <BrokenContent />;
   const trimmedBody = trimReplyFromBody(body);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
+
+  // Find .mp4/.webm URLs
+  const videoUrls = trimmedBody.match(VIDEO_URL_REG);
+  const hasMedia = videoUrls && videoUrls.length > 0;
 
   return (
     <>
@@ -137,7 +176,32 @@ export function MEmote({
         })}
         {edited && <MessageEditedContent />}
       </MessageTextBody>
-      {renderUrlsPreview && urls && urls.length > 0 && renderUrlsPreview(urls)}
+      {/* Only show URL previews if there are URLs and no video URLs */}
+      {renderUrlsPreview && urls && urls.length > 0 && !hasMedia && renderUrlsPreview(urls)}
+      {mediaAutoLoad && videoUrls && videoUrls.length > 0 && (
+        <>
+          {videoUrls.map((url, idx) => (
+            <Video
+              key={url + idx}
+              title="video"
+              src={url}
+              controls
+              autoPlay
+              loop
+              muted
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                maxHeight: 'clamp(250px, 30vh, 40vh)',
+                marginTop: '0.5em',
+                borderRadius: '8px',
+                display: 'block',
+                background: '#000',
+              }}
+            />
+          ))}
+        </>
+      )}
     </>
   );
 }
@@ -149,12 +213,17 @@ type MNoticeProps = {
   renderUrlsPreview?: (urls: string[]) => ReactNode;
 };
 export function MNotice({ edited, content, renderBody, renderUrlsPreview }: MNoticeProps) {
+  const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const { body, formatted_body: customBody } = content;
 
   if (typeof body !== 'string') return <BrokenContent />;
   const trimmedBody = trimReplyFromBody(body);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
+
+  // Find .mp4/.webm URLs
+  const videoUrls = trimmedBody.match(VIDEO_URL_REG);
+  const hasMedia = videoUrls && videoUrls.length > 0;
 
   return (
     <>
@@ -169,7 +238,32 @@ export function MNotice({ edited, content, renderBody, renderUrlsPreview }: MNot
         })}
         {edited && <MessageEditedContent />}
       </MessageTextBody>
-      {renderUrlsPreview && urls && urls.length > 0 && renderUrlsPreview(urls)}
+      {/* Only show URL previews if there are URLs and no video URLs */}
+      {renderUrlsPreview && urls && urls.length > 0 && !hasMedia && renderUrlsPreview(urls)}
+      {mediaAutoLoad && videoUrls && videoUrls.length > 0 && (
+        <>
+          {videoUrls.map((url, idx) => (
+            <Video
+              key={url + idx}
+              title="video"
+              src={url}
+              controls
+              autoPlay
+              loop
+              muted
+              style={{
+                width: '100%',
+                maxWidth: '500px',
+                maxHeight: 'clamp(250px, 30vh, 40vh)',
+                marginTop: '0.5em',
+                borderRadius: '8px',
+                display: 'block',
+                background: '#000',
+              }}
+            />
+          ))}
+        </>
+      )}
     </>
   );
 }
@@ -198,23 +292,28 @@ export function MImage({ content, renderImageContent, outlined }: MImageProps) {
   const height = scaleYDimension(imgInfo?.w || 400, 400, imgInfo?.h || 400);
 
   return (
-    <Attachment outlined={outlined}>
-      <AttachmentBox
-        style={{
-          height: toRem(height < 48 ? 48 : height),
-        }}
+      <Box
+        style={{maxHeight: 'clamp(250px, 30vh, 40vh)'}}
       >
-        {renderImageContent({
-          body: content.body || 'Image',
-          info: imgInfo,
-          mimeType: imgInfo?.mimetype,
-          url: mxcUrl,
-          encInfo: content.file,
-          markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
-          spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
-        })}
-      </AttachmentBox>
-    </Attachment>
+        <Attachment outlined={outlined}>
+          <AttachmentBox
+            style={{
+              height: toRem(height < 48 ? 48 : height),
+              maxHeight: '100%'
+            }}
+          >
+            {renderImageContent({
+              body: content.body || 'Image',
+              info: imgInfo,
+              mimeType: imgInfo?.mimetype,
+              url: mxcUrl,
+              encInfo: content.file,
+              markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
+              spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
+            })}
+          </AttachmentBox>
+        </Attachment>
+      </Box>
   );
 }
 

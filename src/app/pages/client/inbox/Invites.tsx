@@ -61,7 +61,6 @@ import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { StateEvent } from '../../../../types/matrix/room';
-import { testBadWords } from '../../../plugins/bad-words';
 import { allRoomsAtom } from '../../../state/room-list/roomList';
 import { useIgnoredUsers } from '../../../hooks/useIgnoredUsers';
 import { useReportRoomSupported } from '../../../hooks/useReportRoomSupported';
@@ -134,12 +133,6 @@ const makeInviteData = (mx: MatrixClient, room: Room, useAuthentication: boolean
   };
 };
 
-const hasBadWords = (invite: InviteData): boolean =>
-  testBadWords(invite.roomName) ||
-  testBadWords(invite.roomTopic ?? '') ||
-  testBadWords(invite.senderName) ||
-  testBadWords(invite.senderId) ||
-  testBadWords(invite.reason || '');
 
 type NavigateHandler = (roomId: string, space: boolean) => void;
 
@@ -710,7 +703,7 @@ export function Invites() {
     const unknown: InviteData[] = [];
     const spam: InviteData[] = [];
     invitesData.forEach((invite) => {
-      if (hasBadWords(invite) || bannedInRooms(mx, allRooms, invite.senderId)) {
+      if (bannedInRooms(mx, allRooms, invite.senderId)) {
         spam.push(invite);
         return;
       }

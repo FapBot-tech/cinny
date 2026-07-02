@@ -1,96 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <title>iFap Test-Chat</title>
-    <meta name="name" content="Cinny" />
-    <meta name="author" content="Ajay Bura" />
-    <meta
-      name="description"
-      content="A Matrix client where you can enjoy the conversation using simple, elegant and secure interface protected by e2ee with the power of open source."
-    />
-    <meta
-      name="keywords"
-      content="cinny, cinnyapp, cinnychat, matrix, matrix client, matrix.org, element"
-    />
+    <title>FapRealm Chat - Adult & Kink Community</title>
+    <meta name="description" content="Join FapRealm Chat, the ultimate community for kinksters and like-minded individuals. Share fantasies, connect with others, and explore your desires in a friendly environment." />
+    <meta name="keywords" content="FapRealm, kink chat, adult community, fantasies, kinksters, erotic roleplay, kink community" />
+    <link rel="canonical" href="https://chat.faprealm.com/" />
 
-    <meta property="og:title" content="Cinny" />
-    <meta property="og:url" content="https://cinny.in" />
-    <meta property="og:image" content="https://cinny.in/assets/favicon-48x48.png" />
-    <meta
-      property="og:description"
-      content="A Matrix client where you can enjoy the conversation using simple, elegant and secure interface protected by e2ee with the power of open source."
-    />
-    <meta name="theme-color" content="#000000" />
+    <!-- Facebook / Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chat.faprealm.com/" />
+    <meta property="og:title" content="FapRealm Chat - Free Adult & Kink Community" />
+    <meta property="og:description" content="Join FapRealm Chat, the ultimate community for kinksters and like-minded individuals. Share fantasies, connect with others, and explore your desires in a friendly environment." />
+    <meta property="og:image" content="https://moderation.faprealm.com/background.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://chat.faprealm.com/" />
+    <meta property="twitter:title" content="FapRealm Chat - Free Adult & Kink Community" />
+    <meta property="twitter:description" content="Join FapRealm Chat, the ultimate community for kinksters and like-minded individuals. Share fantasies, connect with others, and explore your desires in a friendly environment." />
+    <meta property="twitter:image" content="https://moderation.faprealm.com/background.png" />
+
+    <meta name="theme-color" content="#3888DD"/>
 
     <link id="favicon" rel="shortcut icon" href="./public/favicon.ico" />
+    <link rel="icon" href="./public/res/svg/cinny.svg" type="image/svg+xml">
+    <link
+            rel="apple-touch-icon"
+            sizes="57x57"
+            href="./public/res/apple/apple-touch-icon-57x57.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="60x60"
+            href="./public/res/apple/apple-touch-icon-60x60.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="72x72"
+            href="./public/res/apple/apple-touch-icon-72x72.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="76x76"
+            href="./public/res/apple/apple-touch-icon-76x76.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="114x114"
+            href="./public/res/apple/apple-touch-icon-114x114.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="120x120"
+            href="./public/res/apple/apple-touch-icon-120x120.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="144x144"
+            href="./public/res/apple/apple-touch-icon-144x144.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="152x152"
+            href="./public/res/apple/apple-touch-icon-152x152.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="167x167"
+            href="./public/res/apple/apple-touch-icon-167x167.png"
+    />
+    <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="./public/res/apple/apple-touch-icon-180x180.png"
+    />
 
     <link rel="manifest" href="/manifest.json" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="application-name" content="Cinny" />
-    <meta name="apple-mobile-web-app-title" content="Cinny" />
+    <meta name="application-name" content="FapRealm Chat" />
+    <meta name="apple-mobile-web-app-title" content="FapRealm Chat" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-    <link
-      rel="apple-touch-icon"
-      sizes="57x57"
-      href="./public/res/apple/apple-touch-icon-57x57.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="60x60"
-      href="./public/res/apple/apple-touch-icon-60x60.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="72x72"
-      href="./public/res/apple/apple-touch-icon-72x72.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="76x76"
-      href="./public/res/apple/apple-touch-icon-76x76.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="114x114"
-      href="./public/res/apple/apple-touch-icon-114x114.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="120x120"
-      href="./public/res/apple/apple-touch-icon-120x120.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="144x144"
-      href="./public/res/apple/apple-touch-icon-144x144.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="152x152"
-      href="./public/res/apple/apple-touch-icon-152x152.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="167x167"
-      href="./public/res/apple/apple-touch-icon-167x167.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="./public/res/apple/apple-touch-icon-180x180.png"
-    />
-  </head>
-  <body id="appBody">
+    <style>
+        #exploreIcon {
+            color: #ff8800;
+        }
+    </style>
+    <!-- Privacy-friendly analytics by Plausible -->
+    <script defer data-domain="faprealm.com" src="https://analytics.faprealm.com/js/pa-xFhkwaCWuCyD6Tw-xJrU_.js"></script>
     <script>
-      window.global ||= window;
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init({ hashBasedRouting: true, manual: true, autoCapturePageviews: false, endpoint: 'https://analytics.faprealm.com/api/event' })
     </script>
-    <div id="root"></div>
-    <div id="portalContainer"></div>
-    <script type="module" src="./src/index.tsx"></script>
-  </body>
+</head>
+<body id="appBody">
+<script>
+    window.global ||= window;
+</script>
+<div id="root"></div>
+<div id="portalContainer"></div>
+<script type="module" src="./src/index.tsx"></script>
+<script>
+    // Ping Plausible every 1 minute (60000 milliseconds)
+    // This keeps the user in "Current Visitors" and perfectly tracks visit duration.
+    setInterval(() => {
+        if (window.plausible) {
+            window.plausible('Heartbeat'); // Sends a custom event
+        }
+    }, 60000);
+
+    // Track time milestones
+    (() => {
+        let startTime = Date.now();
+        let milestones = [10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300];
+        let tracked = {};
+
+        setInterval(() => {
+            if (location.pathname === '/' && (location.hash === '' || location.hash === '#/')) return;
+
+            let elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
+            milestones.forEach((m) => {
+                if (elapsedMinutes >= m && !tracked[m]) {
+                    if (window.plausible) {
+                        window.plausible('TimeSpent', { props: { minutes: m } });
+                        tracked[m] = true;
+                    }
+                }
+            });
+        }, 10000); // Check every 10 seconds
+    })();
+</script>
+</body>
 </html>

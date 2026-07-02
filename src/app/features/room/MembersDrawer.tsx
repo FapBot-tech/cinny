@@ -59,6 +59,10 @@ import { useSpaceOptionally } from '../../hooks/useSpace';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { useFlattenPowerTagMembers, useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
+import { AccountDataEvent } from '../../../types/matrix/accountData';
+import { useAccountData } from '../../hooks/useAccountData';
+import { useExtendedProfile } from '../../hooks/useExtendedProfile';
+import { getGenderAbbreviation, getGenderIcon } from '../../utils/gender';
 
 type MemberDrawerHeaderProps = {
   room: Room;
@@ -119,6 +123,9 @@ function MemberItem({
   pressed,
   typing,
 }: MemberItemProps) {
+  const [extendedProfile] = useExtendedProfile(member.userId);
+  const genderId = extendedProfile?.[AccountDataEvent.CinnyGender] ?? ''
+
   const name =
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;
   const avatarMxcUrl = member.getMxcAvatarUrl();
@@ -152,10 +159,18 @@ function MemberItem({
         )
       }
     >
-      <Box grow="Yes">
+      <Box grow="Yes" direction="Row" alignItems="Center" justifyContent="SpaceBetween" gap="300">
         <Text size="T400" truncate>
           {name}
         </Text>
+        {genderId && (
+          <Box direction="Row" alignItems="Center" gap="50">
+            <Text size="T200" priority="300" variant="Secondary">
+              {getGenderAbbreviation(genderId)}
+            </Text>
+            <Icon className={css.GenderIcon} src={Icons.User} priority="300" />
+          </Box>
+        )}
       </Box>
     </MenuItem>
   );
@@ -195,7 +210,10 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
   const membershipFilterMenu = useMembershipFilterMenu();
   const sortFilterMenu = useMemberSortMenu();
   const [sortFilterIndex, setSortFilterIndex] = useSetting(settingsAtom, 'memberSortFilterIndex');
-  const [membershipFilterIndex, setMembershipFilterIndex] = useState(0);
+  const [membershipFilterIndex, setMembershipFilterIndex] = useSetting(
+    settingsAtom,
+    'membershipFilterIndex'
+  );
 
   const membershipFilter = useMembershipFilter(membershipFilterIndex, membershipFilterMenu);
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);

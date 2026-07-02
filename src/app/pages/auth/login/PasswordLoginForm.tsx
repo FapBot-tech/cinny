@@ -185,6 +185,10 @@ export function PasswordLoginForm({ defaultUsername, defaultEmail }: PasswordLog
       return;
     }
 
+    if (window.plausible) {
+      window.plausible('LoginSubmit');
+    }
+
     if (isUserId(username)) {
       handleMxIdLogin(username, password);
       return;
@@ -244,11 +248,11 @@ export function PasswordLoginForm({ defaultUsername, defaultEmail }: PasswordLog
                 <FieldError message="Failed to login. Your login request has been rate-limited by server, Please try after some time." />
               )}
               {loginState.error.errcode === LoginError.Unknown && (
-                <FieldError message="Failed to login. Unknown reason." />
+                <FieldError message="Failed to login. Your account has been locked, should've complied with the rules." />
               )}
             </>
           )}
-          <Box grow="Yes" shrink="No" justifyContent="End">
+          <Box grow="Yes" shrink="No" justifyContent="End" style={{display: 'none'}}>
             <Text as="span" size="T200" priority="400" align="Right">
               <Link to={getResetPasswordPath(server)}>Forget Password?</Link>
             </Text>

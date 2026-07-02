@@ -29,6 +29,7 @@ export interface Settings {
 
   isPeopleDrawer: boolean;
   memberSortFilterIndex: number;
+  membershipFilterIndex: number;
   enterForNewline: boolean;
   messageLayout: MessageLayout;
   messageSpacing: MessageSpacing;
@@ -63,6 +64,7 @@ const defaultSettings: Settings = {
 
   isPeopleDrawer: true,
   memberSortFilterIndex: 0,
+  membershipFilterIndex: 0,
   enterForNewline: false,
   messageLayout: 0,
   messageSpacing: '400',

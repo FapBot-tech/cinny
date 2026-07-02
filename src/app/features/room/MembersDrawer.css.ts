@@ -60,3 +60,8 @@ export const DrawerVirtualItem = style({
   left: 0,
   width: '100%',
 });
+
+export const GenderIcon = style({
+  width: toRem(12),
+  height: toRem(12),
+});

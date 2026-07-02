@@ -1,12 +1,14 @@
 import React, {
   ChangeEventHandler,
   FormEventHandler,
+  MouseEventHandler,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 import {
+  as,
   Box,
   Text,
   IconButton,
@@ -15,6 +17,10 @@ import {
   Input,
   Avatar,
   Button,
+  Menu,
+  MenuItem,
+  PopOut,
+  RectCords,
   Overlay,
   OverlayBackdrop,
   OverlayCenter,
@@ -23,15 +29,25 @@ import {
   Header,
   config,
   Spinner,
+  TextArea,
+  toRem,
 } from 'folds';
 import FocusTrap from 'focus-trap-react';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SequenceCardStyle } from '../styles.css';
 import { SettingTile } from '../../../components/setting-tile';
+import { AccountDataEvent } from '../../../../types/matrix/accountData';
+import { Method } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-import { UserProfile, useUserProfile } from '../../../hooks/useUserProfile';
+import { useAccountData } from '../../../hooks/useAccountData';
+import {
+  getExtendedProfilePath,
+  useExtendedProfileNamespace,
+  useExtendedProfileSupported,
+} from '../../../hooks/useExtendedProfile';
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { UserAvatar } from '../../../components/user-avatar';
+import { useUserProfile, UserProfile } from '../../../hooks/useUserProfile';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { nameInitials } from '../../../utils/common';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
@@ -303,6 +319,249 @@ function ProfileDisplayName({ profile, userId }: ProfileProps) {
   );
 }
 
+const GENDER_OPTIONS = [
+  { id: 'male', name: 'Male' },
+  { id: 'female', name: 'Female' },
+  { id: 'trans', name: 'Trans' },
+  { id: 'non-binary', name: 'Non-binary' },
+  { id: 'other', name: 'Other' },
+  { id: 'none', name: 'None' },
+];
+
+type GenderSelectorProps = {
+  selected: string | undefined;
+  onSelect: (genderId: string) => void;
+};
+const GenderSelector = as<'div', GenderSelectorProps>(({ selected, onSelect, ...props }, ref) => (
+  <Menu {...props} ref={ref}>
+    <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
+      {GENDER_OPTIONS.map((option) => (
+        <MenuItem
+          key={option.id}
+          size="300"
+          variant={option.id === selected ? 'Primary' : 'Surface'}
+          radii="300"
+          onClick={() => onSelect(option.id)}
+        >
+          <Text size="T300">{option.name}</Text>
+        </MenuItem>
+      ))}
+    </Box>
+  </Menu>
+));
+
+function ProfileGender({ profile }: { profile: UserProfile }) {
+  const mx = useMatrixClient();
+  const userId = mx.getUserId()!;
+  const genderEvent = useAccountData(AccountDataEvent.CinnyGender);
+  const extendedProfileNamespace = useExtendedProfileNamespace();
+  const [menuCords, setMenuCords] = useState<RectCords>();
+
+  const currentGenderId = genderEvent?.getContent()?.gender;
+  const currentGender = GENDER_OPTIONS.find((o) => o.id === currentGenderId) ?? GENDER_OPTIONS[GENDER_OPTIONS.length - 1];
+
+  const [changeState, changeGender] = useAsyncCallback(
+    useCallback(
+      async (genderId: string) => {
+        const newGenderId = genderId === 'none' ? undefined : genderId;
+
+        // Ensure profile exists to avoid Synapse crash (Issue #19702)
+        if (!profile.displayName && !profile.avatarUrl) {
+          await mx.setDisplayName(getMxIdLocalPart(userId) ?? userId);
+        }
+
+        // Save to account data (private fallback)
+        await mx.setAccountData(AccountDataEvent.CinnyGender, {
+          gender: newGenderId,
+        });
+
+        // Save to extended profile (public visibility)
+        if (newGenderId) {
+          await mx.setExtendedProfileProperty(AccountDataEvent.CinnyGender, newGenderId);
+        } else {
+          await mx.deleteExtendedProfileProperty(AccountDataEvent.CinnyGender);
+        }
+
+        console.log('Saving gender to account data', newGenderId, extendedProfileNamespace);
+      },
+      [mx, userId, extendedProfileNamespace, profile]
+    )
+  );
+  const changingGender = changeState.status === AsyncStatus.Loading;
+
+  const handleGenderMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
+    setMenuCords(evt.currentTarget.getBoundingClientRect());
+  };
+
+  const handleGenderSelect = (genderId: string) => {
+    changeGender(genderId);
+    setMenuCords(undefined);
+  };
+
+  return (
+    <SettingTile
+      title={
+        <Text as="span" size="L400">
+          Gender
+        </Text>
+      }
+      after={
+        <>
+          <Button
+            size="300"
+            variant="Secondary"
+            outlined
+            fill="Soft"
+            radii="300"
+            disabled={changingGender}
+            after={
+              changingGender ? (
+                <Spinner size="300" />
+              ) : (
+                <Icon size="300" src={Icons.ChevronBottom} />
+              )
+            }
+            onClick={handleGenderMenu}
+          >
+            <Text size="T300">{currentGender.name}</Text>
+          </Button>
+          <PopOut
+            anchor={menuCords}
+            offset={5}
+            position="Bottom"
+            align="End"
+            content={
+              <FocusTrap
+                focusTrapOptions={{
+                  initialFocus: false,
+                  onDeactivate: () => setMenuCords(undefined),
+                  clickOutsideDeactivates: true,
+                  isKeyForward: (evt: KeyboardEvent) =>
+                    evt.key === 'ArrowDown' || evt.key === 'ArrowRight',
+                  isKeyBackward: (evt: KeyboardEvent) =>
+                    evt.key === 'ArrowUp' || evt.key === 'ArrowLeft',
+                  escapeDeactivates: stopPropagation,
+                }}
+              >
+                <GenderSelector selected={currentGenderId} onSelect={handleGenderSelect} />
+              </FocusTrap>
+            }
+          />
+        </>
+      }
+    />
+  );
+}
+
+function ProfileAboutMe({ profile }: { profile: UserProfile }) {
+  const mx = useMatrixClient();
+  const userId = mx.getUserId()!;
+  const aboutMeEvent = useAccountData(AccountDataEvent.CinnyAboutMe);
+
+  const defaultAboutMe = aboutMeEvent?.getContent()?.aboutMe ?? '';
+  const [aboutMe, setAboutMe] = useState<string>(defaultAboutMe);
+
+  const [changeState, changeAboutMe] = useAsyncCallback(
+    useCallback(
+      async (text: string) => {
+        const newAboutMe = text.trim() || undefined;
+
+        // Ensure profile exists to avoid Synapse crash (Issue #19702)
+        if (!profile.displayName && !profile.avatarUrl) {
+          await mx.setDisplayName(getMxIdLocalPart(userId) ?? userId);
+        }
+
+        // Save to account data (private fallback)
+        await mx.setAccountData(AccountDataEvent.CinnyAboutMe, {
+          aboutMe: newAboutMe,
+        });
+
+        // Save to extended profile (public visibility)
+        if (newAboutMe) {
+          await mx.setExtendedProfileProperty(AccountDataEvent.CinnyAboutMe, newAboutMe);
+        } else {
+          await mx.deleteExtendedProfileProperty(AccountDataEvent.CinnyAboutMe);
+        }
+      },
+      [mx, userId, profile]
+    )
+  );
+  const changingAboutMe = changeState.status === AsyncStatus.Loading;
+
+  useEffect(() => {
+    setAboutMe(defaultAboutMe);
+  }, [defaultAboutMe]);
+
+  const handleChange: ChangeEventHandler<HTMLTextAreaElement> = (evt) => {
+    setAboutMe(evt.currentTarget.value.slice(0, 500));
+  };
+
+  const handleReset = () => {
+    setAboutMe(defaultAboutMe);
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (evt) => {
+    evt.preventDefault();
+    if (changingAboutMe) return;
+
+    changeAboutMe(aboutMe);
+  };
+
+  const hasChanges = aboutMe !== defaultAboutMe;
+
+  return (
+    <SettingTile
+      title={
+        <Text as="span" size="L400">
+          About me
+        </Text>
+      }
+    >
+      <Box direction="Column" grow="Yes" gap="100">
+        <Box
+          as="form"
+          onSubmit={handleSubmit}
+          gap="200"
+          aria-disabled={changingAboutMe}
+        >
+          <Box grow="Yes" direction="Column" gap="100">
+            <TextArea
+              name="aboutMeInput"
+              value={aboutMe}
+              onChange={handleChange}
+              variant="Secondary"
+              radii="300"
+              placeholder="Tell others about yourself..."
+              readOnly={changingAboutMe}
+              style={{
+                minHeight: toRem(80),
+                padding: config.space.S200,
+              }}
+            />
+            <Box style={{ padding: `0 ${config.space.S100}` }}>
+              <Text size="T200" priority="300">
+                {aboutMe.length}/500
+              </Text>
+            </Box>
+          </Box>
+          <Button
+            size="400"
+            variant={hasChanges ? 'Success' : 'Secondary'}
+            fill={hasChanges ? 'Solid' : 'Soft'}
+            outlined
+            radii="300"
+            disabled={!hasChanges || changingAboutMe}
+            type="submit"
+          >
+            {changingAboutMe && <Spinner variant="Success" fill="Solid" size="300" />}
+            <Text size="B400">Save</Text>
+          </Button>
+        </Box>
+      </Box>
+    </SettingTile>
+  );
+}
+
 export function Profile() {
   const mx = useMatrixClient();
   const userId = mx.getUserId()!;
@@ -318,7 +577,8 @@ export function Profile() {
         gap="400"
       >
         <ProfileAvatar userId={userId} profile={profile} />
-        <ProfileDisplayName userId={userId} profile={profile} />
+        <ProfileGender profile={profile} />
+        <ProfileAboutMe profile={profile} />
       </SequenceCard>
     </Box>
   );

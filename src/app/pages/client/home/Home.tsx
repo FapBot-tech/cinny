@@ -45,6 +45,7 @@ import {
 } from '../../../hooks/router/useHomeSelected';
 import { useHomeRooms } from './useHomeRooms';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
+import { useIsAdmin } from '../../../hooks/useIsAdmin';
 import { VirtualTile } from '../../../components/virtualizer';
 import { RoomNavCategoryButton, RoomNavItem } from '../../../features/room-nav';
 import { makeNavCategoryId } from '../../../state/closedNavCategories';
@@ -154,6 +155,7 @@ function HomeHeader() {
 
 function HomeEmpty() {
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
 
   return (
     <NavEmptyCenter>
@@ -171,11 +173,13 @@ function HomeEmpty() {
         }
         options={
           <>
-            <Button onClick={() => navigate(getHomeCreatePath())} variant="Secondary" size="300">
-              <Text size="B300" truncate>
-                Create Room
-              </Text>
-            </Button>
+            {isAdmin && (
+              <Button onClick={() => navigate(getHomeCreatePath())} variant="Secondary" size="300">
+                <Text size="B300" truncate>
+                  Create Room
+                </Text>
+              </Button>
+            )}
             <Button
               onClick={() => navigate(getExplorePath())}
               variant="Secondary"
@@ -196,6 +200,7 @@ function HomeEmpty() {
 const DEFAULT_CATEGORY_ID = makeNavCategoryId('home', 'room');
 export function Home() {
   const mx = useMatrixClient();
+  const isAdmin = useIsAdmin();
   useNavToActivePathMapper('home');
   const scrollRef = useRef<HTMLDivElement>(null);
   const rooms = useHomeRooms();
@@ -241,60 +246,24 @@ export function Home() {
         <PageNavContent scrollRef={scrollRef}>
           <Box direction="Column" gap="300">
             <NavCategory>
-              <NavItem variant="Background" radii="400" aria-selected={createRoomSelected}>
-                <NavButton onClick={() => navigate(getHomeCreatePath())}>
-                  <NavItemContent>
-                    <Box as="span" grow="Yes" alignItems="Center" gap="200">
-                      <Avatar size="200" radii="400">
-                        <Icon src={Icons.Plus} size="100" />
-                      </Avatar>
-                      <Box as="span" grow="Yes">
-                        <Text as="span" size="Inherit" truncate>
-                          Create Room
-                        </Text>
+              {isAdmin && (
+                <NavItem variant="Background" radii="400" aria-selected={createRoomSelected}>
+                  <NavButton onClick={() => navigate(getHomeCreatePath())}>
+                    <NavItemContent>
+                      <Box as="span" grow="Yes" alignItems="Center" gap="200">
+                        <Avatar size="200" radii="400">
+                          <Icon src={Icons.Plus} size="100" />
+                        </Avatar>
+                        <Box as="span" grow="Yes">
+                          <Text as="span" size="Inherit" truncate>
+                            Create Room
+                          </Text>
+                        </Box>
                       </Box>
-                    </Box>
-                  </NavItemContent>
-                </NavButton>
-              </NavItem>
-              <UseStateProvider initial={false}>
-                {(open, setOpen) => (
-                  <>
-                    <NavItem variant="Background" radii="400">
-                      <NavButton onClick={() => setOpen(true)}>
-                        <NavItemContent>
-                          <Box as="span" grow="Yes" alignItems="Center" gap="200">
-                            <Avatar size="200" radii="400">
-                              <Icon src={Icons.Link} size="100" />
-                            </Avatar>
-                            <Box as="span" grow="Yes">
-                              <Text as="span" size="Inherit" truncate>
-                                Join with Address
-                              </Text>
-                            </Box>
-                          </Box>
-                        </NavItemContent>
-                      </NavButton>
-                    </NavItem>
-                    {open && (
-                      <JoinAddressPrompt
-                        onCancel={() => setOpen(false)}
-                        onOpen={(roomIdOrAlias, viaServers, eventId) => {
-                          setOpen(false);
-                          const path = getHomeRoomPath(roomIdOrAlias, eventId);
-                          navigate(
-                            viaServers
-                              ? withSearchParam<_RoomSearchParams>(path, {
-                                  viaServers: encodeSearchParamValueArray(viaServers),
-                                })
-                              : path
-                          );
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </UseStateProvider>
+                    </NavItemContent>
+                  </NavButton>
+                </NavItem>
+              )}
               <NavItem variant="Background" radii="400" aria-selected={searchSelected}>
                 <NavLink to={getHomeSearchPath()}>
                   <NavItemContent>

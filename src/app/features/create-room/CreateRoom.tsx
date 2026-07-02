@@ -250,7 +250,7 @@ export function CreateRoomForm({
                 after={
                   <Switch
                     variant="Primary"
-                    value={encryption}
+                    value={false}
                     onChange={setEncryption}
                     disabled={disabled}
                   />
@@ -293,7 +293,7 @@ export function CreateRoomForm({
             after={
               <Switch
                 variant="Primary"
-                value={federation}
+                value={false}
                 onChange={setFederation}
                 disabled={disabled}
               />

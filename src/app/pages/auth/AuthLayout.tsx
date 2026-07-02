@@ -125,7 +125,7 @@ export function AuthLayout() {
   return (
     <Scroll variant="Background" visibility="Hover" size="300" hideTrack>
       <Box
-        className={classNames(css.AuthLayout, PatternsCss.BackgroundDotPattern)}
+        className={classNames(css.AuthLayout)}
         direction="Column"
         alignItems="Center"
         justifyContent="SpaceBetween"
@@ -135,11 +135,11 @@ export function AuthLayout() {
           <Header className={css.AuthHeader} size="600" variant="Surface">
             <Box grow="Yes" direction="Row" gap="300" alignItems="Center">
               <img className={css.AuthLogo} src={CinnySVG} alt="Cinny Logo" />
-              <Text size="H3">Cinny</Text>
+              <Text size="H3">FapRealm Login</Text>
             </Box>
           </Header>
           <Box className={css.AuthCardContent} direction="Column">
-            <Box direction="Column" gap="100">
+            <Box direction="Column" gap="100" style={{display: 'none'}}>
               <Text as="label" size="L400" priority="300">
                 Homeserver
               </Text>

@@ -193,7 +193,7 @@ function GlobalPackSelector({
                                   <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
                                 ) : (
                                   <AvatarFallback>
-                                    <Icon size="400" src={Icons.Sticker} filled />
+                                    <Icon size="400" src={Icons.Smile} filled />
                                   </AvatarFallback>
                                 )}
                               </Avatar>
@@ -392,7 +392,7 @@ export function GlobalPacks({ onViewPack }: GlobalPacksProps) {
                   <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
                 ) : (
                   <AvatarFallback>
-                    <Icon size="400" src={Icons.Sticker} filled />
+                    <Icon size="400" src={Icons.Smile} filled />
                   </AvatarFallback>
                 )}
               </Avatar>
@@ -429,7 +429,7 @@ export function GlobalPacks({ onViewPack }: GlobalPacksProps) {
         >
           <SettingTile
             title="Select Pack"
-            description="Pick emojis and stickers pack from rooms to use in all rooms."
+            description="Pick emoji packs from rooms to use in all rooms."
             after={
               <>
                 <Button

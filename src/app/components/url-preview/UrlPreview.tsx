@@ -25,3 +25,7 @@ export const UrlPreviewContent = as<'div'>(({ className, ...props }, ref) => (
 export const UrlPreviewDescription = as<'span'>(({ className, ...props }, ref) => (
   <span className={classNames(css.UrlPreviewDescription, className)} {...props} ref={ref} />
 ));
+
+export const UrlPreviewHeroImg = as<'img'>(({ className, alt, ...props }, ref) => (
+    <img className={classNames(css.UrlPreviewHeroImg, className)} alt={alt} {...props} ref={ref} />
+));

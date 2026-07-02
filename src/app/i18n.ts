@@ -24,7 +24,7 @@ i18n
     },
     load: 'languageOnly',
     backend: {
-      loadPath: `${trimTrailingSlash(import.meta.env.BASE_URL)}/public/locales/{{lng}}.json`,
+      loadPath: `${trimTrailingSlash(import.meta.env.BASE_URL)}/locales/{{lng}}.json`,
     },
   });
 

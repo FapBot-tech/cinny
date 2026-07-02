@@ -1,8 +1,9 @@
-import { MatrixClient, SyncState } from 'matrix-js-sdk';
+import { MatrixClient, MatrixError, SyncState } from 'matrix-js-sdk';
 import React, { useCallback, useState } from 'react';
 import { Box, config, Line, Text } from 'folds';
 import { useSyncState } from '../../hooks/useSyncState';
 import { ContainerColor } from '../../styles/ContainerColor.css';
+import { ErrorCode } from '../../cs-errorcode';
 
 type StateData = {
   current: SyncState | null;
@@ -29,6 +30,16 @@ export function SyncStatus({ mx }: SyncStatusProps) {
       });
     }, [])
   );
+
+  if (stateData.current === SyncState.Error) {
+    const error = mx.getSyncStateData()?.error as MatrixError;
+    if (
+      error?.errcode === ErrorCode.M_USER_DEACTIVATED ||
+      error?.httpStatus === 401
+    ) {
+      return null;
+    }
+  }
 
   if (
     (stateData.current === SyncState.Prepared ||

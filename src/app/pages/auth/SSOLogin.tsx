@@ -1,4 +1,5 @@
 import { Avatar, AvatarImage, Box, Button, Text } from 'folds';
+import * as styles from './styles.css';
 import { IIdentityProvider, SSOAction, createClient } from 'matrix-js-sdk';
 import React, { useMemo } from 'react';
 import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
@@ -52,6 +53,7 @@ export function SSOLogin({ providers, redirectUrl, action, saveScreenSpace }: SS
 
           return (
             <Button
+              className={styles.CtaButton}
               style={{ width: '100%' }}
               key={id}
               as="a"
@@ -76,6 +78,7 @@ export function SSOLogin({ providers, redirectUrl, action, saveScreenSpace }: SS
         })
       ) : (
         <Button
+          className={styles.CtaButton}
           style={{ width: '100%' }}
           as="a"
           href={getSSOIdUrl()}

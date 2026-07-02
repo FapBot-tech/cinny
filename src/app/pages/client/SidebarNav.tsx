@@ -35,7 +35,6 @@ export function SidebarNav() {
             <SidebarStackSeparator />
             <SidebarStack>
               <ExploreTab />
-              <CreateTab />
             </SidebarStack>
           </Scroll>
         }
@@ -44,7 +43,6 @@ export function SidebarNav() {
             <SidebarStackSeparator />
             <SidebarStack>
               <SearchTab />
-              <UnverifiedTab />
               <InboxTab />
               <SettingsTab />
             </SidebarStack>

@@ -75,7 +75,7 @@ const useSettingsMenuItems = (): SettingsMenuItem[] =>
       },
       {
         page: SettingsPages.EmojisStickersPage,
-        name: 'Emojis & Stickers',
+        name: 'Custom Emojis',
         icon: Icons.Smile,
       },
       {

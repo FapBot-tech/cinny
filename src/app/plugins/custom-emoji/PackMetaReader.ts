@@ -3,7 +3,7 @@ import { PackMeta, ImageUsage } from './types';
 export class PackMetaReader {
   private readonly meta: PackMeta;
 
-  public readonly fallbackUsage: ImageUsage[] = [ImageUsage.Emoticon, ImageUsage.Sticker];
+  public readonly fallbackUsage: ImageUsage[] = [ImageUsage.Emoticon];
 
   constructor(meta: PackMeta) {
     this.meta = meta;
@@ -28,15 +28,7 @@ export class PackMetaReader {
   }
 
   get usage(): ImageUsage[] {
-    if (!Array.isArray(this.meta.usage)) return this.fallbackUsage;
-
-    const knownUsage = this.meta.usage.filter(
-      (u) => u === ImageUsage.Emoticon || u === ImageUsage.Sticker
-    );
-
-    if (knownUsage.length === 0) return this.fallbackUsage;
-
-    return knownUsage;
+    return [ImageUsage.Emoticon];
   }
 
   get content(): PackMeta {

@@ -9,6 +9,7 @@ import { BreakWord } from '../../styles/Text.css';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { timeDayMonYear, timeHourMinute } from '../../utils/time';
+import { getMxIdLocalPart } from '../../utils/matrix';
 
 type UserKickAlertProps = {
   reason?: string;
@@ -300,6 +301,24 @@ export function UserModeration({ userId, canKick, canBan, canInvite }: UserModer
               disabled={disabled}
             >
               <Text size="B300">Invite</Text>
+            </Button>
+          )}
+          {canKick && (
+            <Button
+              style={{ flexGrow: 1 }}
+              size="300"
+              variant="Secondary"
+              fill="Soft"
+              radii="300"
+              before={<Icon size="50" src={Icons.External} />}
+              onClick={() =>
+                window.open(
+                  `https://moderation.faprealm.com/chat_user/${getMxIdLocalPart(userId)}`,
+                  '_blank'
+                )
+              }
+            >
+              <Text size="B300">FapBot</Text>
             </Button>
           )}
           {canKick && (

@@ -153,8 +153,20 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           },
         };
 
-        return mx.sendMessage(roomId, content);
-      }, [mx, editor, roomId, mEvent, isMarkdown, getPrevBodyAndFormattedBody])
+        const txnId = mx.makeTxnId();
+        return mx.sendMessage(roomId, content, txnId).catch((err) => {
+          if (
+            err.httpStatus === 403 &&
+            err.data?.error?.toLowerCase().includes('file sharing is disabled')
+          ) {
+            const event = room.getEventForTxnId(txnId);
+            if (event) {
+              mx.cancelPendingEvent(event);
+            }
+          }
+          throw err;
+        });
+      }, [mx, room, editor, roomId, mEvent, isMarkdown, getPrevBodyAndFormattedBody])
     );
 
     const handleSave = useCallback(() => {

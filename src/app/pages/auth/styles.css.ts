@@ -9,13 +9,16 @@ export const AuthLayout = style({
   paddingRight: config.space.S200,
   paddingBottom: 0,
   position: 'relative',
+  backgroundImage: `url('https://moderation.faprealm.com/background/daily')`,
+  backgroundSize: 'cover',
 });
 
 export const AuthCard = style({
   marginTop: '1vh',
   maxWidth: toRem(460),
   width: '100%',
-  backgroundColor: color.Surface.Container,
+  backgroundColor: 'rgba(38, 38, 38, .75)', // Adjusting opacity to 80%
+
   color: color.Surface.OnContainer,
   borderRadius: config.radii.R400,
   boxShadow: config.shadow.E100,
@@ -50,4 +53,13 @@ export const AuthCardContent = style({
 
 export const AuthFooter = style({
   padding: config.space.S200,
+});
+
+export const CtaButton = style({
+  selectors: {
+    '&:hover': {
+      backgroundColor: `${color.Primary.Main} !important`,
+      color: `${color.Primary.ContainerHover} !important`,
+    },
+  },
 });

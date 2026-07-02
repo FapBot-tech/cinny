@@ -23,6 +23,7 @@ import { RenderElement, RenderLeaf } from './Elements';
 import { CustomElement } from './slate';
 import * as css from './Editor.css';
 import { toggleKeyboardShortcut } from './keyboard';
+import { isAndroid } from '../../utils/user-agent';
 
 const initialValue: CustomElement[] = [
   {
@@ -146,6 +147,9 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
                 onKeyDown={handleKeydown}
                 onKeyUp={onKeyUp}
                 onPaste={onPaste}
+                autoCapitalize={isAndroid() ? 'none' : undefined}
+                autoCorrect={isAndroid() ? 'off' : undefined}
+                spellCheck={isAndroid() ? false : undefined}
               />
             </Scroll>
             {after && (

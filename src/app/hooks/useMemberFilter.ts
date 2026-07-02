@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 import { RoomMember } from 'matrix-js-sdk';
 import { Membership } from '../../types/matrix/room';
+import { Presence } from './useUserPresence';
 
 export const MembershipFilter = {
   filterJoined: (m: RoomMember) => m.membership === Membership.Join,
+  filterOnline: (m: RoomMember) =>
+    m.membership === Membership.Join && m.user?.presence === Presence.Online,
   filterInvited: (m: RoomMember) => m.membership === Membership.Invite,
   filterLeaved: (m: RoomMember) =>
     m.membership === Membership.Leave &&
@@ -27,6 +30,10 @@ export const useMembershipFilterMenu = (): MembershipFilterItem[] =>
       {
         name: 'Joined',
         filterFn: MembershipFilter.filterJoined,
+      },
+      {
+        name: 'Online',
+        filterFn: MembershipFilter.filterOnline,
       },
       {
         name: 'Invited',

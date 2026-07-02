@@ -71,12 +71,21 @@ import { getFallbackSession } from '../state/sessions';
 import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
 
+import { PlausibleTracker } from '../components/PlausibleTracker';
+
 export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize) => {
   const { hashRouter } = clientConfig;
   const mobile = screenSize === ScreenSize.Mobile;
 
   const routes = createRoutesFromElements(
-    <Route>
+    <Route
+      element={
+        <>
+          <PlausibleTracker />
+          <Outlet />
+        </>
+      }
+    >
       <Route
         index
         loader={() => {

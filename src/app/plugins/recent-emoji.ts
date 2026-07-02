@@ -29,9 +29,9 @@ export function addRecentEmoji(mx: MatrixClient, unicode: string) {
   const recentEmojiEvent = getAccountData(mx, AccountDataEvent.ElementRecentEmoji);
   const recentEmojiContent = recentEmojiEvent?.getContent<IRecentEmojiContent>();
   const recentEmoji =
-    recentEmojiContent && Array.isArray(recentEmojiContent.recent_emoji)
-      ? structuredClone(recentEmojiContent.recent_emoji)
-      : [];
+      recentEmojiContent && Array.isArray(recentEmojiContent.recent_emoji)
+          ? structuredClone(recentEmojiContent.recent_emoji)
+          : [];
 
   const emojiIndex = recentEmoji.findIndex(([u]) => u === unicode);
   let entry: [EmojiUnicode, EmojiUsageCount];

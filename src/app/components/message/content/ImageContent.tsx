@@ -117,7 +117,9 @@ export const ImageContent = as<'div', ImageContentProps>(
     }, [autoPlay, loadSrc]);
 
     return (
-      <Box className={classNames(css.RelativeBase, className)} {...props} ref={ref}>
+      <Box
+        // style={{maxHeight: '40vh'}}
+        className={classNames(css.RelativeBase, className)} {...props} ref={ref}>
         {srcState.status === AsyncStatus.Success && (
           <Overlay open={viewer} backdrop={<OverlayBackdrop />}>
             <OverlayCenter>

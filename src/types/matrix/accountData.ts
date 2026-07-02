@@ -6,6 +6,8 @@ export enum AccountDataEvent {
   CinnySpaces = 'in.cinny.spaces',
 
   ElementRecentEmoji = 'io.element.recent_emoji',
+  CinnyGender = 'in.cinny.gender',
+  CinnyAboutMe = 'in.cinny.about_me',
 
   PoniesUserEmotes = 'im.ponies.user_emotes',
   PoniesEmoteRooms = 'im.ponies.emote_rooms',

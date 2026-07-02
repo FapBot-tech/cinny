@@ -58,6 +58,7 @@ type RegisterFormInputs = {
   tokenInput?: HTMLInputElement;
   emailInput?: HTMLInputElement;
   termsInput?: HTMLInputElement;
+  ageInput?: HTMLInputElement;
 };
 
 type FormData = {
@@ -66,6 +67,7 @@ type FormData = {
   token?: string;
   email?: string;
   terms?: boolean;
+  age?: boolean;
   clientSecret: string;
 };
 
@@ -209,6 +211,11 @@ export function PasswordRegisterForm({
 
   const handleSubmit: ChangeEventHandler<HTMLFormElement> = (evt) => {
     evt.preventDefault();
+
+    if (window.plausible) {
+      window.plausible('RegisterSubmit');
+    }
+
     const {
       usernameInput,
       passwordInput,
@@ -216,6 +223,7 @@ export function PasswordRegisterForm({
       emailInput,
       tokenInput,
       termsInput,
+      ageInput,
     } = evt.target as HTMLFormElement & RegisterFormInputs;
     const token = tokenInput?.value.trim();
     const username = usernameInput.value.trim();
@@ -226,6 +234,7 @@ export function PasswordRegisterForm({
     }
     const email = emailInput?.value.trim();
     const terms = termsInput?.value === 'on';
+    const age = ageInput?.value === 'on';
 
     if (!username) {
       usernameInput.focus();
@@ -238,6 +247,7 @@ export function PasswordRegisterForm({
       token,
       email,
       terms,
+      age,
       clientSecret: mx.generateClientSecret(),
     };
     const pickedStages = pickStages(uiaFlows, fData);
@@ -368,11 +378,9 @@ export function PasswordRegisterForm({
           <Box alignItems="Center" gap="200">
             <Checkbox name="termsInput" size="300" variant="Primary" required />
             <Text size="T300">
-              I accept server{' '}
-              <a href={termUrl} target="_blank" rel="noreferrer">
-                Terms and Conditions
-              </a>
-              .
+              I accept the <a href={termUrl} target="_blank" rel="noreferrer">
+                Server Rules
+              </a>.
             </Text>
           </Box>
         )}
@@ -388,6 +396,12 @@ export function PasswordRegisterForm({
         {registerError?.errcode === RegisterError.Unknown && (
           <FieldError message={registerError.data.error ?? 'Failed to register. Unknown Reason.'} />
         )}
+        <Box alignItems="Center" gap="200">
+          <Checkbox name="ageInput" size="300" variant="Primary" required />
+          <Text size="T300">
+            I am over 18 years of age.
+          </Text>
+        </Box>
         <span data-spacing-node />
         <Button variant="Primary" size="500" type="submit">
           <Text as="span" size="B500">

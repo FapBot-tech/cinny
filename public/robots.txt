@@ -1,0 +1,6 @@
+# Allow all bots to crawl your site
+User-agent: *
+Allow: /
+
+# Point to your sitemap
+Sitemap: https://faprealm.com/sitemap.xml

@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
-import { Box, Text, color } from 'folds';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Box, Text, color, Button } from 'folds';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { SSOAction } from 'matrix-js-sdk';
 import { useAuthServer } from '../../../hooks/useAuthServer';
 import { RegisterFlowStatus, useAuthFlows } from '../../../hooks/useAuthFlows';
 import { useParsedLoginFlows } from '../../../hooks/useParsedLoginFlows';
 import { PasswordRegisterForm, SUPPORTED_REGISTER_STAGES } from '../register/PasswordRegisterForm';
 import { OrDivider } from '../OrDivider';
+import * as styles from '../styles.css';
 import { SSOLogin } from '../SSOLogin';
 import { SupportedUIAFlowsLoader } from '../../../components/SupportedUIAFlowsLoader';
 import { getLoginPath } from '../../pathUtils';
@@ -24,6 +25,7 @@ const useRegisterSearchParams = (searchParams: URLSearchParams): RegisterPathSea
   );
 
 export function Register() {
+  const navigate = useNavigate();
   const server = useAuthServer();
   const { loginFlows, registerFlows } = useAuthFlows();
   const [searchParams] = useSearchParams();
@@ -34,7 +36,7 @@ export function Register() {
   const ssoRedirectUrl = usePathWithOrigin(getLoginPath(server));
 
   return (
-    <Box direction="Column" gap="500">
+    <Box direction="Column" gap="400">
       <Text size="H2" priority="400">
         Register
       </Text>
@@ -75,7 +77,6 @@ export function Register() {
               )
             }
           </SupportedUIAFlowsLoader>
-          <span data-spacing-node />
           {sso && <OrDivider />}
         </>
       )}
@@ -90,9 +91,22 @@ export function Register() {
           <span data-spacing-node />
         </>
       )}
-      <Text align="Center">
-        Already have an account? <Link to={getLoginPath(server)}>Login</Link>
-      </Text>
+      <Box direction="Column" gap="200" alignItems="Center">
+        <OrDivider />
+        <Button
+          className={styles.CtaButton}
+          style={{ width: '100%' }}
+          variant="Secondary"
+          fill="None"
+          outlined
+          size="500"
+          onClick={() => navigate(getLoginPath(server))}
+        >
+          <Text as="span" size="B500">
+            Login
+          </Text>
+        </Button>
+      </Box>
     </Box>
   );
 }

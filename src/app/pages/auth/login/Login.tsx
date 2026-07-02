@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Box, Text, color } from 'folds';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Box, Text, color, Button } from 'folds';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { SSOAction } from 'matrix-js-sdk';
 import { useAuthFlows } from '../../../hooks/useAuthFlows';
 import { useAuthServer } from '../../../hooks/useAuthServer';
@@ -9,10 +9,13 @@ import { PasswordLoginForm } from './PasswordLoginForm';
 import { SSOLogin } from '../SSOLogin';
 import { TokenLogin } from './TokenLogin';
 import { OrDivider } from '../OrDivider';
+import * as styles from '../styles.css';
 import { getLoginPath, getRegisterPath, withSearchParam } from '../../pathUtils';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { LoginPathSearchParams } from '../../paths';
 import { useClientConfig } from '../../../hooks/useClientConfig';
+import {ContainerColor} from "../../../styles/ContainerColor.css";
+import {convertToRGBA} from "pdfjs-dist/types/src/shared/image_utils";
 
 const getLoginTokenSearchParam = () => {
   // when using hasRouter query params in existing route
@@ -35,6 +38,7 @@ const useLoginSearchParams = (searchParams: URLSearchParams): LoginPathSearchPar
   );
 
 export function Login() {
+  const navigate = useNavigate();
   const server = useAuthServer();
   const { hashRouter } = useClientConfig();
   const { loginFlows } = useAuthFlows();
@@ -55,45 +59,62 @@ export function Login() {
   const parsedFlows = useParsedLoginFlows(loginFlows.flows);
 
   return (
-    <Box direction="Column" gap="500">
-      <Text size="H2" priority="400">
-        Login
-      </Text>
-      {parsedFlows.token && loginSearchParams.loginToken && (
-        <TokenLogin token={loginSearchParams.loginToken} />
-      )}
-      {parsedFlows.password && (
-        <>
-          <PasswordLoginForm
-            defaultUsername={loginSearchParams.username}
-            defaultEmail={loginSearchParams.email}
-          />
-          <span data-spacing-node />
-          {parsedFlows.sso && <OrDivider />}
-        </>
-      )}
-      {parsedFlows.sso && (
-        <>
-          <SSOLogin
-            providers={parsedFlows.sso.identity_providers}
-            redirectUrl={ssoRedirectUrl}
-            action={SSOAction.LOGIN}
-            saveScreenSpace={parsedFlows.password !== undefined}
-          />
-          <span data-spacing-node />
-        </>
-      )}
-      {!parsedFlows.password && !parsedFlows.sso && (
-        <>
-          <Text style={{ color: color.Critical.Main }}>
-            {`This client does not support login on "${server}" homeserver. Password and SSO based login method not found.`}
-          </Text>
-          <span data-spacing-node />
-        </>
-      )}
-      <Text align="Center">
-        Do not have an account? <Link to={getRegisterPath(server)}>Register</Link>
-      </Text>
-    </Box>
+    <div>
+      <Box direction="Column" gap="400">
+        <Text size="H2" priority="400">
+          Login
+        </Text>
+        <Text priority="300">
+            Welcome to FapRealm. Join our vibrant, moderated community for real-time adult chat and erotic roleplay. A safe, respectful space to connect and explore.
+        </Text>
+        {parsedFlows.token && loginSearchParams.loginToken && (
+          <TokenLogin token={loginSearchParams.loginToken} />
+        )}
+        {parsedFlows.password && (
+          <>
+            <PasswordLoginForm
+              defaultUsername={loginSearchParams.username}
+              defaultEmail={loginSearchParams.email}
+            />
+            {parsedFlows.sso && <OrDivider />}
+          </>
+        )}
+        {parsedFlows.sso && (
+          <>
+            <SSOLogin
+              providers={parsedFlows.sso.identity_providers}
+              redirectUrl={ssoRedirectUrl}
+              action={SSOAction.LOGIN}
+              saveScreenSpace={parsedFlows.password !== undefined}
+            />
+            <span data-spacing-node />
+          </>
+        )}
+        {!parsedFlows.password && !parsedFlows.sso && (
+          <>
+            <Text style={{ color: color.Critical.Main }}>
+              {`This client does not support login on "${server}" homeserver. Password and SSO based login method not found.`}
+            </Text>
+            <span data-spacing-node />
+          </>
+        )}
+        <Box direction="Column" gap="200" alignItems="Center">
+          <OrDivider />
+          <Button
+            className={styles.CtaButton}
+            style={{ width: '100%' }}
+            variant="Secondary"
+            fill="None"
+            outlined
+            size="500"
+            onClick={() => navigate(getRegisterPath(server))}
+          >
+            <Text as="span" size="B500">
+              Create an account
+            </Text>
+          </Button>
+        </Box>
+      </Box>
+    </div>
   );
 }

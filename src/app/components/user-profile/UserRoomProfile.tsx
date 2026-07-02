@@ -1,15 +1,19 @@
 import { Box, Button, config, Icon, Icons, Text } from 'folds';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Linkify from 'linkify-react';
+import { LINKIFY_OPTS } from '../../plugins/react-custom-html-parser';
 import { UserHero, UserHeroName } from './UserHero';
-import { getMxIdServer, mxcUrlToHttp } from '../../utils/matrix';
-import { getMemberAvatarMxc, getMemberDisplayName } from '../../utils/room';
+import { AccountDataEvent } from '../../../types/matrix/accountData';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { useAccountData } from '../../hooks/useAccountData';
+import { useExtendedProfile } from '../../hooks/useExtendedProfile';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { usePowerLevels } from '../../hooks/usePowerLevels';
-import { useRoom } from '../../hooks/useRoom';
 import { useUserPresence } from '../../hooks/useUserPresence';
-import { IgnoredUserAlert, MutualRoomsChip, OptionsChip, ServerChip, ShareChip } from './UserChips';
+import { useRoom } from '../../hooks/useRoom';
+import { usePowerLevels } from '../../hooks/usePowerLevels';
+import { getMxIdLocalPart, getMxIdServer, mxcUrlToHttp, getDMRoomFor } from '../../utils/matrix';
+import { getMemberAvatarMxc, getMemberDisplayName } from '../../utils/room';
 import { useCloseUserRoomProfile } from '../../state/hooks/userRoomProfile';
 import { PowerChip } from './PowerChip';
 import { UserInviteAlert, UserBanAlert, UserModeration, UserKickAlert } from './UserModeration';
@@ -20,8 +24,11 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useMemberPowerCompare } from '../../hooks/useMemberPowerCompare';
 import { CreatorChip } from './CreatorChip';
-import { getDirectCreatePath, withSearchParam } from '../../pages/pathUtils';
+import { ServerChip, ShareChip, MutualRoomsChip, OptionsChip, IgnoredUserAlert } from './UserChips';
+import { getDirectCreatePath, getDirectRoomPath, withSearchParam } from '../../pages/pathUtils';
 import { DirectCreateSearchParams } from '../../pages/paths';
+import { getGenderIcon } from '../../utils/gender';
+import { useDirectRooms } from '../../pages/client/direct/useDirectRooms';
 
 type UserRoomProfileProps = {
   userId: string;
@@ -33,6 +40,7 @@ export function UserRoomProfile({ userId }: UserRoomProfileProps) {
   const closeUserRoomProfile = useCloseUserRoomProfile();
   const ignoredUsers = useIgnoredUsers();
   const ignored = ignoredUsers.includes(userId);
+  const directs = useDirectRooms();
 
   const room = useRoom();
   const powerLevels = usePowerLevels(room);
@@ -58,9 +66,28 @@ export function UserRoomProfile({ userId }: UserRoomProfileProps) {
   const avatarUrl = (avatarMxc && mxcUrlToHttp(mx, avatarMxc, useAuthentication)) ?? undefined;
 
   const presence = useUserPresence(userId);
+  const [extendedProfile] = useExtendedProfile(userId);
+  const genderId = extendedProfile?.[AccountDataEvent.CinnyGender] ?? '';
+  const gender = genderId
+    ? genderId.charAt(0).toUpperCase() + genderId.slice(1).replace(/-/g, ' ')
+    : undefined;
+  const aboutMe = extendedProfile?.[AccountDataEvent.CinnyAboutMe];
 
   const handleMessage = () => {
     closeUserRoomProfile();
+
+    const dmRoomId = directs.find((roomId) => mx.getRoom(roomId)?.getMember(userId));
+    if (dmRoomId) {
+      navigate(getDirectRoomPath(dmRoomId));
+      return;
+    }
+
+    const dmRoom = getDMRoomFor(mx, userId);
+    if (dmRoom) {
+      navigate(getDirectRoomPath(dmRoom.roomId));
+      return;
+    }
+
     const directSearchParam: DirectCreateSearchParams = {
       userId,
     };
@@ -93,6 +120,19 @@ export function UserRoomProfile({ userId }: UserRoomProfileProps) {
               </Box>
             )}
           </Box>
+          {gender && (
+            <Box alignItems="Center" gap="100">
+              <Icon size="50" src={getGenderIcon(genderId)} />
+              <Text size="T200" priority="300">
+                {gender}
+              </Text>
+            </Box>
+          )}
+          {aboutMe && (
+            <Text size="T200" priority="300" style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+              <Linkify options={LINKIFY_OPTS}>{aboutMe}</Linkify>
+            </Text>
+          )}
           <Box alignItems="Center" gap="200" wrap="Wrap">
             {server && <ServerChip server={server} />}
             <ShareChip userId={userId} />

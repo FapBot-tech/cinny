@@ -47,7 +47,7 @@ export function UserPack({ onViewPack }: UserPackProps) {
                 <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
               ) : (
                 <AvatarFallback>
-                  <Icon size="400" src={Icons.Sticker} filled />
+                  <Icon size="400" src={Icons.Smile} filled />
                 </AvatarFallback>
               )}
             </Avatar>

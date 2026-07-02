@@ -9,10 +9,8 @@ export const useUsageStr = (): ((usage: ImageUsage[]) => string) => {
     const sticker = usage.includes(ImageUsage.Sticker);
     const emoticon = usage.includes(ImageUsage.Emoticon);
 
-    if (sticker && emoticon) return 'Both';
-    if (sticker) return 'Sticker';
     if (emoticon) return 'Emoji';
-    return 'Both';
+    return 'Emoji';
   };
   return getUsageStr;
 };
@@ -27,10 +25,7 @@ export function UsageSelector({ selected, onChange }: UsageSelectorProps) {
   const selectedUsageStr = getUsageStr(selected);
   const isSelected = (usage: ImageUsage[]) => getUsageStr(usage) === selectedUsageStr;
 
-  const allUsages: ImageUsage[][] = useMemo(
-    () => [[ImageUsage.Emoticon], [ImageUsage.Sticker], [ImageUsage.Sticker, ImageUsage.Emoticon]],
-    []
-  );
+  const allUsages: ImageUsage[][] = useMemo(() => [[ImageUsage.Emoticon]], []);
 
   return (
     <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>

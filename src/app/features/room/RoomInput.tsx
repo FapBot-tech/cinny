@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
-import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
+import { EventType, IContent, MsgType, RelationType, Room, IEventRelation } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
 import { Transforms, Editor } from 'slate';
 import {
@@ -28,6 +28,7 @@ import {
   config,
   toRem,
 } from 'folds';
+import { StickerEventContent } from 'matrix-js-sdk/lib/types';
 
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import {
@@ -68,6 +69,7 @@ import { useFilePicker } from '../../hooks/useFilePicker';
 import { useFilePasteHandler } from '../../hooks/useFilePasteHandler';
 import { useFileDropZone } from '../../hooks/useFileDrop';
 import {
+  IReplyDraft,
   TUploadItem,
   TUploadMetadata,
   roomIdToMsgDraftAtomFamily,
@@ -117,6 +119,26 @@ import { useTheme } from '../../hooks/useTheme';
 import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
 import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
+
+const getReplyContent = (replyDraft: IReplyDraft | undefined): IEventRelation => {
+    if (!replyDraft) return {};
+
+    const relatesTo: IEventRelation = {};
+
+    relatesTo['m.in_reply_to'] = {
+        event_id: replyDraft.eventId,
+    };
+
+    if (replyDraft.relation?.rel_type === RelationType.Thread) {
+        relatesTo.event_id = replyDraft.relation.event_id;
+        relatesTo.rel_type = RelationType.Thread;
+        relatesTo.is_falling_back = false;
+    }
+    return relatesTo;
+};
+interface ReplyEventContent {
+    'm.relates_to'?: IEventRelation;
+}
 
 interface RoomInputProps {
   editor: Editor;
@@ -276,6 +298,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     };
 
     const handleSendUpload = async (uploads: UploadSuccess[]) => {
+      const plaintext = toPlainText(editor.children, isMarkdown).trim();
       const contentsPromises = uploads.map(async (upload) => {
         const fileItem = selectedFiles.find((f) => f.file === upload.file);
         if (!fileItem) throw new Error('Broken upload');
@@ -293,7 +316,28 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       });
       handleCancelUpload(uploads);
       const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
-      contents.forEach((content) => mx.sendMessage(roomId, content as any));
+
+      if (contents.length > 0) {
+          const replyContent = plaintext.length === 0 ? getReplyContent(replyDraft) : undefined;
+          if (replyContent) contents[0]['m.relates_to'] = replyContent;
+          setReplyDraft(undefined);
+      }
+
+      contents.forEach((content) => {
+        const txnId = mx.makeTxnId();
+        mx.sendMessage(roomId, content as any, txnId).catch((err) => {
+          if (
+            err.httpStatus === 403 &&
+            err.data?.error?.toLowerCase().includes('file sharing is disabled')
+          ) {
+            const room = mx.getRoom(roomId);
+            const event = room?.getEventForTxnId(txnId);
+            if (event) {
+              mx.cancelPendingEvent(event);
+            }
+          }
+        });
+      });
     };
 
     const submit = useCallback(() => {
@@ -360,19 +404,22 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         content.format = 'org.matrix.custom.html';
         content.formatted_body = formattedBody;
       }
-      if (replyDraft) {
-        content['m.relates_to'] = {
-          'm.in_reply_to': {
-            event_id: replyDraft.eventId,
-          },
-        };
-        if (replyDraft.relation?.rel_type === RelationType.Thread) {
-          content['m.relates_to'].event_id = replyDraft.relation.event_id;
-          content['m.relates_to'].rel_type = RelationType.Thread;
-          content['m.relates_to'].is_falling_back = false;
+      if (replyDraft) content['m.relates_to'] = getReplyContent(replyDraft);
+
+      const txnId = mx.makeTxnId();
+      mx.sendMessage(roomId, content as any, txnId).catch((err) => {
+        if (
+          err.httpStatus === 403 &&
+          err.data?.error?.toLowerCase().includes('file sharing is disabled')
+        ) {
+          const room = mx.getRoom(roomId);
+          const pendingEvents = room?.getPendingEvents() || [];
+          const event = pendingEvents.find((e) => e.getTxnId() === txnId);
+          if (event) {
+            mx.cancelPendingEvent(event);
+          }
         }
-      }
-      mx.sendMessage(roomId, content as any);
+      });
       resetEditor(editor);
       resetEditorHistory(editor);
       setReplyDraft(undefined);
@@ -439,10 +486,28 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         await getImageUrlBlob(stickerUrl)
       );
 
-      mx.sendEvent(roomId, EventType.Sticker, {
+      const content: StickerEventContent & ReplyEventContent = {
         body: label,
         url: mxc,
         info,
+      };
+      if (replyDraft) {
+          content['m.relates_to'] = getReplyContent(replyDraft);
+          setReplyDraft(undefined);
+      }
+      const txnId = mx.makeTxnId();
+      mx.sendEvent(roomId, EventType.Sticker, content, txnId).catch((err) => {
+        if (
+          err.httpStatus === 403 &&
+          err.data?.error?.toLowerCase().includes('file sharing is disabled')
+        ) {
+          const room = mx.getRoom(roomId);
+          const pendingEvents = room?.getPendingEvents() || [];
+          const event = pendingEvents.find((e) => e.getTxnId() === txnId);
+          if (event) {
+            mx.cancelPendingEvent(event);
+          }
+        }
       });
     };
 
@@ -635,7 +700,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                       />
                     }
                   >
-                    {!hideStickerBtn && (
+                    {false && (
                       <IconButton
                         aria-pressed={emojiBoardTab === EmojiBoardTab.Sticker}
                         onClick={() => setEmojiBoardTab(EmojiBoardTab.Sticker)}
@@ -651,9 +716,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                     )}
                     <IconButton
                       ref={emojiBtnRef}
-                      aria-pressed={
-                        hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
-                      }
+                      aria-pressed={!!emojiBoardTab}
                       onClick={() => setEmojiBoardTab(EmojiBoardTab.Emoji)}
                       variant="SurfaceVariant"
                       size="300"
@@ -661,9 +724,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                     >
                       <Icon
                         src={Icons.Smile}
-                        filled={
-                          hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
-                        }
+                        filled={!!emojiBoardTab}
                       />
                     </IconButton>
                   </PopOut>

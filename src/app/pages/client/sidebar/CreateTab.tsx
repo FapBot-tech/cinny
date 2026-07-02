@@ -3,6 +3,7 @@ import { Box, config, Icon, Icons, Menu, PopOut, RectCords, Text } from 'folds';
 import FocusTrap from 'focus-trap-react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarAvatar, SidebarItem, SidebarItemTooltip } from '../../../components/sidebar';
+import { useIsAdmin } from '../../../hooks/useIsAdmin';
 import { stopPropagation } from '../../../utils/keyboard';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SettingTile } from '../../../components/setting-tile';
@@ -19,6 +20,7 @@ import { _RoomSearchParams } from '../../paths';
 
 export function CreateTab() {
   const createSelected = useCreateSelected();
+  const isAdmin = useIsAdmin();
 
   const navigate = useNavigate();
   const [menuCords, setMenuCords] = useState<RectCords>();
@@ -37,6 +39,8 @@ export function CreateTab() {
     setJoinAddress(true);
     setMenuCords(undefined);
   };
+
+  if (!isAdmin) return null;
 
   return (
     <SidebarItem active={createSelected}>

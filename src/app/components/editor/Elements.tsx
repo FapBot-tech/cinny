@@ -43,6 +43,7 @@ function RenderMentionElement({
       })}
       contentEditable={false}
     >
+      <InlineChromiumBugfix />
       {element.name}
       {children}
     </span>
@@ -66,6 +67,7 @@ function RenderCommandElement({
       })}
       contentEditable={false}
     >
+      <InlineChromiumBugfix />
       {`/${element.command}`}
       {children}
     </span>
@@ -90,6 +92,7 @@ function RenderEmoticonElement({
         })}
         contentEditable={false}
       >
+        <InlineChromiumBugfix />
         {element.key.startsWith('mxc://') ? (
           <img
             className={css.EmoticonImg}

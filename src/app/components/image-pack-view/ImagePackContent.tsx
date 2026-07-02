@@ -323,7 +323,7 @@ export const ImagePackContent = as<'div', ImagePackContentProps>(
               after={
                 <UsageSwitcher
                   usage={currentMeta.usage}
-                  canEdit={canEdit}
+                  canEdit={false}
                   onChange={handlePackUsageChange}
                 />
               }

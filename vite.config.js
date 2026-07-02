@@ -31,16 +31,32 @@ const copyFiles = {
       dest: '',
     },
     {
+      src: 'public/robots.txt',
+      dest: '',
+    },
+    {
+      src: 'public/sitemap.xml',
+      dest: '',
+    },
+    {
       src: 'public/manifest.json',
       dest: '',
     },
     {
+      src: 'public/favicon.ico',
+      dest: '',
+    },
+    {
+      src: 'public/res/apple',
+      dest: 'res/',
+    },
+    {
       src: 'public/res/android',
-      dest: 'public/',
+      dest: 'res/',
     },
     {
       src: 'public/locales',
-      dest: 'public/',
+      dest: 'locales/',
     },
   ],
 };
