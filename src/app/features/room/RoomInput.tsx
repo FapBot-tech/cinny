@@ -25,9 +25,11 @@ import {
   PopOut,
   Scroll,
   Text,
+  color,
   config,
   toRem,
 } from 'folds';
+import { isSuspendedAtom } from '../../state/userStatus';
 import { StickerEventContent } from 'matrix-js-sdk/lib/types';
 
 import { useMatrixClient } from '../../hooks/useMatrixClient';
@@ -241,6 +243,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const [hideStickerBtn, setHideStickerBtn] = useState(document.body.clientWidth < 500);
 
     const isComposing = useComposingCheck();
+    const isSuspended = useAtomValue(isSuspendedAtom);
 
     useElementSizeObserver(
       useCallback(() => fileDropContainerRef.current, [fileDropContainerRef]),
@@ -510,6 +513,27 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         }
       });
     };
+
+    if (isSuspended) {
+      return (
+        <div ref={ref}>
+          <Box
+            style={{ padding: config.space.S400, backgroundColor: color.Critical.Container }}
+            alignItems="Center"
+            justifyContent="Center"
+            direction="Column"
+            gap="200"
+          >
+            <Text style={{ color: color.Critical.Main }} size="H4">
+              Your account has been suspended.
+            </Text>
+            <Text size="B400">
+              Please check the <a href="https://moderation.faprealm.com/rules" target="_blank" rel="noreferrer" style={{ color: color.Critical.Main, textDecoration: 'underline' }}>guidelines</a>.
+            </Text>
+          </Box>
+        </div>
+      );
+    }
 
     return (
       <div ref={ref}>

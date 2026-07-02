@@ -35,6 +35,7 @@ export function SyncStatus({ mx }: SyncStatusProps) {
     const error = mx.getSyncStateData()?.error as MatrixError;
     if (
       error?.errcode === ErrorCode.M_USER_DEACTIVATED ||
+      error?.errcode === ErrorCode.M_USER_SUSPENDED ||
       error?.httpStatus === 401
     ) {
       return null;

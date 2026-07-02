@@ -36,6 +36,31 @@ export const initClient = async (session: Session): Promise<MatrixClient> => {
   await mx.initRustCrypto();
 
   mx.setMaxListeners(50);
+  const handleSuspended = (err: any) => {
+    if (err.errcode === 'M_USER_SUSPENDED' || (err.data && err.data.errcode === 'M_USER_SUSPENDED')) {
+      mx.emit('account_suspended' as any, err);
+    }
+  };
+
+  const originalAuthedRequest = mx.http.authedRequest.bind(mx.http);
+  mx.http.authedRequest = async function (...args: any[]) {
+    try {
+      return await originalAuthedRequest(...args);
+    } catch (err) {
+      handleSuspended(err);
+      throw err;
+    }
+  };
+
+  const originalRequest = mx.http.request.bind(mx.http);
+  mx.http.request = async function (...args: any[]) {
+    try {
+      return await originalRequest(...args);
+    } catch (err) {
+      handleSuspended(err);
+      throw err;
+    }
+  };
 
   return mx;
 };

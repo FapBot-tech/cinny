@@ -38,6 +38,8 @@ import { getFallbackSession } from '../../state/sessions';
 import { AutoDiscovery } from './AutoDiscovery';
 import { ErrorCode } from '../../cs-errorcode';
 import { UserDeactivatedDialog } from '../../components/UserDeactivatedDialog';
+import { isSuspendedAtom } from '../../state/userStatus';
+import { useSetAtom } from 'jotai';
 
 function ClientRootLoading() {
   return (
@@ -141,13 +143,28 @@ const useLogoutListener = (mx?: MatrixClient) => {
   }, [mx]);
 };
 
+const useSuspendedListener = (mx?: MatrixClient) => {
+  const setIsSuspended = useSetAtom(isSuspendedAtom);
+  useEffect(() => {
+    const handleSuspended = () => {
+      setIsSuspended(true);
+    };
+
+    mx?.on('account_suspended' as any, handleSuspended);
+    return () => {
+      mx?.removeListener('account_suspended' as any, handleSuspended);
+    };
+  }, [mx, setIsSuspended]);
+};
+
 type ClientRootProps = {
   children: ReactNode;
 };
 export function ClientRoot({ children }: ClientRootProps) {
   const [loading, setLoading] = useState(true);
   const { baseUrl, userId } = getFallbackSession() ?? {};
-    const [isDeactivated, setIsDeactivated] = useState(false);
+  const [isDeactivated, setIsDeactivated] = useState(false);
+  const setIsSuspended = useSetAtom(isSuspendedAtom);
 
   const [loadState, loadMatrix] = useAsyncCallback<MatrixClient, Error, []>(
     useCallback(() => {
@@ -164,6 +181,7 @@ export function ClientRoot({ children }: ClientRootProps) {
   );
 
   useLogoutListener(mx);
+  useSuspendedListener(mx);
 
   useEffect(() => {
     if (loadState.status === AsyncStatus.Idle) {
@@ -191,8 +209,12 @@ export function ClientRoot({ children }: ClientRootProps) {
         ) {
           setIsDeactivated(true);
         }
+        if (error?.errcode === ErrorCode.M_USER_SUSPENDED) {
+          setIsSuspended(true);
+          setLoading(false);
+        }
       }
-    }, [])
+    }, [setIsSuspended])
   );
 
   return (

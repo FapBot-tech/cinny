@@ -136,15 +136,23 @@ export const toggleBlock = (editor: Editor, format: BlockType, option?: BlockOpt
 };
 
 export const resetEditor = (editor: Editor) => {
-  Transforms.delete(editor, {
-    at: {
-      anchor: Editor.start(editor, []),
-      focus: Editor.end(editor, []),
-    },
-  });
+  try {
+    Transforms.delete(editor, {
+      at: {
+        anchor: Editor.start(editor, []),
+        focus: Editor.end(editor, []),
+      },
+    });
+  } catch {
+    // ignore
+  }
 
-  toggleBlock(editor, BlockType.Paragraph);
-  removeAllMark(editor);
+  try {
+    toggleBlock(editor, BlockType.Paragraph);
+    removeAllMark(editor);
+  } catch {
+    // ignore
+  }
 };
 
 export const resetEditorHistory = (editor: Editor) => {
@@ -253,6 +261,7 @@ export const getPrevWorldRange = (editor: Editor): BaseRange | undefined => {
 };
 
 export const isEmptyEditor = (editor: Editor): boolean => {
+  if (editor.children.length === 0) return true;
   const firstChildren = editor.children[0];
   if (firstChildren && Element.isElement(firstChildren)) {
     const isEmpty = editor.children.length === 1 && Editor.isEmpty(editor, firstChildren);
