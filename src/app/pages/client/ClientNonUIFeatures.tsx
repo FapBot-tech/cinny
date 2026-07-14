@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
@@ -12,6 +12,7 @@ import { notificationPermission, setFavicon } from '../../utils/dom';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
+import { mDirectAtom } from '../../state/mDirectList';
 import { usePreviousValue } from '../../hooks/usePreviousValue';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getInboxInvitesPath, getInboxNotificationsPath } from '../pathUtils';
@@ -19,6 +20,7 @@ import {
   getMemberDisplayName,
   getNotificationType,
   getUnreadInfo,
+  isDirectInvite,
   isNotificationEvent,
 } from '../../utils/room';
 import { NotificationType, UnreadInfo } from '../../../types/matrix/room';
@@ -26,6 +28,7 @@ import { getMxIdLocalPart, mxcUrlToHttp } from '../../utils/matrix';
 import { useSelectedRoom } from '../../hooks/router/useSelectedRoom';
 import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
+import { addToastAtom } from '../../state/toast';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -81,10 +84,13 @@ function InviteNotifications() {
   const invites = useAtomValue(allInvitesAtom);
   const perviousInviteLen = usePreviousValue(invites.length, 0);
   const mx = useMatrixClient();
+  const useAuthentication = useMediaAuthentication();
 
   const navigate = useNavigate();
   const [showNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [notificationSound] = useSetting(settingsAtom, 'isNotificationSounds');
+  const [toastNotifications] = useSetting(settingsAtom, 'toastNotifications');
+  const addToast = useSetAtom(addToastAtom);
 
   const notify = useCallback(
     (count: number) => {
@@ -117,8 +123,43 @@ function InviteNotifications() {
       if (notificationSound) {
         playSound();
       }
+
+      if (toastNotifications) {
+        const newInviteRoomId = invites[invites.length - 1];
+        const room = mx.getRoom(newInviteRoomId);
+        if (room && isDirectInvite(room, mx.getUserId())) {
+          const inviter = room.getAvatarFallbackMember();
+          const avatarMxc = inviter?.getMxcAvatarUrl() ?? room.getMxcAvatarUrl();
+          const title = 'New Invitation';
+          const body = `Invitation from ${inviter?.rawDisplayName ?? room.name}`;
+          addToast({
+            title,
+            body,
+            icon: avatarMxc
+              ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
+              : undefined,
+            colorId: inviter?.userId ?? room.roomId,
+            fallback: inviter?.rawDisplayName ?? room.name,
+            onClick: () => {
+              navigate(getInboxInvitesPath());
+            },
+          });
+        }
+      }
     }
-  }, [mx, invites, perviousInviteLen, showNotifications, notificationSound, notify, playSound]);
+  }, [
+    mx,
+    invites,
+    perviousInviteLen,
+    showNotifications,
+    notificationSound,
+    toastNotifications,
+    addToast,
+    useAuthentication,
+    notify,
+    playSound,
+    navigate,
+  ]);
 
   return (
     // eslint-disable-next-line jsx-a11y/media-has-caption
@@ -136,6 +177,9 @@ function MessageNotifications() {
   const useAuthentication = useMediaAuthentication();
   const [showNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [notificationSound] = useSetting(settingsAtom, 'isNotificationSounds');
+  const [toastNotifications] = useSetting(settingsAtom, 'toastNotifications');
+  const addToast = useSetAtom(addToastAtom);
+  const mDirects = useAtomValue(mDirectAtom);
 
   const navigate = useNavigate();
   const notificationSelected = useInboxNotificationsSelected();
@@ -226,6 +270,30 @@ function MessageNotifications() {
         });
       }
 
+      if (toastNotifications) {
+        const isDirect = mDirects.has(room.roomId);
+        const isHighlight = unreadInfo.highlight > 0;
+
+        if (isDirect || isHighlight) {
+          const avatarMxc =
+            room.getAvatarFallbackMember()?.getMxcAvatarUrl() ?? room.getMxcAvatarUrl();
+          const senderName =
+            getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender;
+          addToast({
+            title: room.name ?? 'Unknown',
+            body: `New message from ${senderName}`,
+            icon: avatarMxc
+              ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
+              : undefined,
+            colorId: isDirect ? sender : room.roomId,
+            fallback: isDirect ? senderName : room.name,
+            onClick: () => {
+              navigate(getInboxNotificationsPath());
+            },
+          });
+        }
+      }
+
       if (notificationSound) {
         playSound();
       }
@@ -239,6 +307,10 @@ function MessageNotifications() {
     notificationSound,
     notificationSelected,
     showNotifications,
+    toastNotifications,
+    addToast,
+    mDirects,
+    navigate,
     playSound,
     notify,
     selectedRoomId,

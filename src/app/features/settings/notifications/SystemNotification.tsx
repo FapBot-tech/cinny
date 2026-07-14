@@ -91,6 +91,10 @@ export function SystemNotification() {
     settingsAtom,
     'isNotificationSounds'
   );
+  const [toastNotifications, setToastNotifications] = useSetting(
+    settingsAtom,
+    'toastNotifications'
+  );
 
   const requestNotificationPermission = () => {
     window.Notification.requestPermission();
@@ -143,6 +147,18 @@ export function SystemNotification() {
           title="Notification Sound"
           description="Play sound when new message arrive."
           after={<Switch value={isNotificationSounds} onChange={setIsNotificationSounds} />}
+        />
+      </SequenceCard>
+      <SequenceCard
+        className={SequenceCardStyle}
+        variant="SurfaceVariant"
+        direction="Column"
+        gap="400"
+      >
+        <SettingTile
+          title="Toast Notifications"
+          description="Show in-app toast for direct messages and mentions."
+          after={<Switch value={toastNotifications} onChange={setToastNotifications} />}
         />
       </SequenceCard>
     </Box>

@@ -12,6 +12,7 @@ import { FeatureCheck } from './FeatureCheck';
 import { createRouter } from './Router';
 import { ScreenSizeProvider, useScreenSize } from '../hooks/useScreenSize';
 import { useCompositionEndTracking } from '../hooks/useComposingCheck';
+import { ToastContainer } from '../components/ToastContainer';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function App() {
                     <QueryClientProvider client={queryClient}>
                       <JotaiProvider>
                         <RouterProvider router={createRouter(clientConfig, screenSize)} />
+                        <ToastContainer />
                       </JotaiProvider>
                       <ReactQueryDevtools initialIsOpen={false} />
                     </QueryClientProvider>
