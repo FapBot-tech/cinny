@@ -27,6 +27,7 @@ export interface Settings {
   pageZoom: number;
   sendTypingNotifications: boolean;
   sendReadReceipts: boolean;
+  sendPresence: boolean;
 
   isPeopleDrawer: boolean;
   memberSortFilterIndex: number;
@@ -63,6 +64,7 @@ const defaultSettings: Settings = {
   pageZoom: 100,
   sendTypingNotifications: true,
   sendReadReceipts: true,
+  sendPresence: true,
 
   isPeopleDrawer: true,
   memberSortFilterIndex: 0,

@@ -160,6 +160,17 @@ const useSuspendedListener = (mx?: MatrixClient) => {
   }, [mx, setIsSuspended]);
 };
 
+const usePresenceListener = (mx?: MatrixClient) => {
+  const [sendPresence] = useSetting(settingsAtom, 'sendPresence');
+  useEffect(() => {
+    if (mx && mx.clientRunning) {
+      const presence = sendPresence ? 'online' : 'offline';
+      mx.setPresence({ presence });
+      mx.setSyncPresence(presence);
+    }
+  }, [mx, sendPresence]);
+};
+
 type ClientRootProps = {
   children: ReactNode;
 };
@@ -185,6 +196,7 @@ export function ClientRoot({ children }: ClientRootProps) {
 
   useLogoutListener(mx);
   useSuspendedListener(mx);
+  usePresenceListener(mx);
 
   useEffect(() => {
     if (loadState.status === AsyncStatus.Idle) {

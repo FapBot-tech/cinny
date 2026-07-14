@@ -714,6 +714,7 @@ function Editor() {
     'sendTypingNotifications'
   );
   const [sendReadReceipts, setSendReadReceipts] = useSetting(settingsAtom, 'sendReadReceipts');
+  const [sendPresence, setSendPresence] = useSetting(settingsAtom, 'sendPresence');
 
   return (
     <Box direction="Column" gap="1200">
@@ -739,6 +740,11 @@ function Editor() {
           title="Read receipts"
           description="Send public read receipts. If disabled, you will still send private receipts to keep your own account in sync."
           after={<Switch variant="Primary" value={sendReadReceipts} onChange={setSendReadReceipts} />}
+        />
+        <SettingTile
+          title="Status updates"
+          description="Send presence updates to the server. If disabled, you will always appear offline."
+          after={<Switch variant="Primary" value={sendPresence} onChange={setSendPresence} />}
         />
       </SequenceCard>
 
