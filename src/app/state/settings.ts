@@ -25,6 +25,8 @@ export interface Settings {
   editorToolbar: boolean;
   twitterEmoji: boolean;
   pageZoom: number;
+  sendTypingNotifications: boolean;
+  sendReadReceipts: boolean;
   hideActivity: boolean;
 
   isPeopleDrawer: boolean;
@@ -60,6 +62,8 @@ const defaultSettings: Settings = {
   editorToolbar: false,
   twitterEmoji: false,
   pageZoom: 100,
+  sendTypingNotifications: true,
+  sendReadReceipts: true,
   hideActivity: false,
 
   isPeopleDrawer: true,
@@ -88,9 +92,21 @@ const defaultSettings: Settings = {
 export const getSettings = () => {
   const settings = localStorage.getItem(STORAGE_KEY);
   if (settings === null) return defaultSettings;
+  const parsedSettings = JSON.parse(settings) as Settings;
+
+  // Migration for hideActivity
+  if (parsedSettings.hideActivity !== undefined) {
+    if (parsedSettings.sendTypingNotifications === undefined) {
+      parsedSettings.sendTypingNotifications = !parsedSettings.hideActivity;
+    }
+    if (parsedSettings.sendReadReceipts === undefined) {
+      parsedSettings.sendReadReceipts = !parsedSettings.hideActivity;
+    }
+  }
+
   return {
     ...defaultSettings,
-    ...(JSON.parse(settings) as Settings),
+    ...parsedSettings,
   };
 };
 

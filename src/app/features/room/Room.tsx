@@ -31,7 +31,7 @@ export function Room() {
   const callEmbed = useCallEmbed();
 
   const [isDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
-  const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
+  const [sendReadReceipts] = useSetting(settingsAtom, 'sendReadReceipts');
   const screenSize = useScreenSizeContext();
   const powerLevels = usePowerLevels(room);
   const members = useRoomMembers(mx, room.roomId);
@@ -42,10 +42,10 @@ export function Room() {
     useCallback(
       (evt) => {
         if (isKeyHotkey('escape', evt)) {
-          markAsRead(mx, room.roomId, hideActivity);
+          markAsRead(mx, room.roomId, !sendReadReceipts);
         }
       },
-      [mx, room.roomId, hideActivity]
+      [mx, room.roomId, sendReadReceipts]
     )
   );
 

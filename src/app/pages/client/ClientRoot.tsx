@@ -35,6 +35,8 @@ import { stopPropagation } from '../../utils/keyboard';
 import { SyncStatus } from './SyncStatus';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
+import { useSetting } from '../../state/hooks/settings';
+import { settingsAtom } from '../../state/settings';
 import { AutoDiscovery } from './AutoDiscovery';
 import { ErrorCode } from '../../cs-errorcode';
 import { UserDeactivatedDialog } from '../../components/UserDeactivatedDialog';

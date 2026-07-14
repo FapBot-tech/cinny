@@ -129,14 +129,14 @@ export const useBindRoomIdToTypingMembersAtom = (
   typingMembersAtom: typeof roomIdToTypingMembersAtom
 ) => {
   const setTypingMembers = useSetAtom(typingMembersAtom);
-  const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
+  const [sendTypingNotifications] = useSetting(settingsAtom, 'sendTypingNotifications');
 
   useEffect(() => {
     const handleTypingEvent: RoomMemberEventHandlerMap[RoomMemberEvent.Typing] = (
       event,
       member
     ) => {
-      if (hideActivity) {
+      if (!sendTypingNotifications) {
         return;
       }
       setTypingMembers({
@@ -151,5 +151,5 @@ export const useBindRoomIdToTypingMembersAtom = (
     return () => {
       mx.removeListener(RoomMemberEvent.Typing, handleTypingEvent);
     };
-  }, [mx, setTypingMembers, hideActivity]);
+  }, [mx, setTypingMembers, sendTypingNotifications]);
 };

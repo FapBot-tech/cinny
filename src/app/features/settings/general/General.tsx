@@ -710,33 +710,59 @@ function DateAndTime() {
 function Editor() {
   const [enterForNewline, setEnterForNewline] = useSetting(settingsAtom, 'enterForNewline');
   const [isMarkdown, setIsMarkdown] = useSetting(settingsAtom, 'isMarkdown');
-  const [hideActivity, setHideActivity] = useSetting(settingsAtom, 'hideActivity');
+  const [sendTypingNotifications, setSendTypingNotifications] = useSetting(
+    settingsAtom,
+    'sendTypingNotifications'
+  );
+  const [sendReadReceipts, setSendReadReceipts] = useSetting(settingsAtom, 'sendReadReceipts');
 
   return (
-    <Box direction="Column" gap="100">
-      <Text size="L400">Editor</Text>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
+    <Box direction="Column" gap="1200">
+      <Text size="L400">Activity</Text>
+      <SequenceCard
+        className={SequenceCardStyle}
+        variant="SurfaceVariant"
+        direction="Column"
+        gap="400"
+      >
         <SettingTile
-          title="ENTER for Newline"
-          description={`Use ${
-            isMacOS() ? KeySymbol.Command : 'Ctrl'
-          } + ENTER to send message and ENTER for newline.`}
-          after={<Switch variant="Primary" value={enterForNewline} onChange={setEnterForNewline} />}
+          title="Typing notifications"
+          description="Send and receive typing notifications."
+          after={
+            <Switch
+              variant="Primary"
+              value={sendTypingNotifications}
+              onChange={setSendTypingNotifications}
+            />
+          }
+        />
+        <SettingTile
+          title="Read receipts"
+          description="Send public read receipts. If disabled, you will still send private receipts to keep your own account in sync."
+          after={<Switch variant="Primary" value={sendReadReceipts} onChange={setSendReadReceipts} />}
         />
       </SequenceCard>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
-          title="Markdown Formatting"
-          after={<Switch variant="Primary" value={isMarkdown} onChange={setIsMarkdown} />}
-        />
-      </SequenceCard>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
-          title="Hide Typing & Read Receipts"
-          description="Turn off both typing status and read receipts to keep your activity private."
-          after={<Switch variant="Primary" value={hideActivity} onChange={setHideActivity} />}
-        />
-      </SequenceCard>
+
+      <Box direction="Column" gap="100">
+        <Text size="L400">Editor</Text>
+        <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
+          <SettingTile
+            title="ENTER for Newline"
+            description={`Use ${
+              isMacOS() ? KeySymbol.Command : 'Ctrl'
+            } + ENTER to send message and ENTER for newline.`}
+            after={
+              <Switch variant="Primary" value={enterForNewline} onChange={setEnterForNewline} />
+            }
+          />
+        </SequenceCard>
+        <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
+          <SettingTile
+            title="Markdown Formatting"
+            after={<Switch variant="Primary" value={isMarkdown} onChange={setIsMarkdown} />}
+          />
+        </SequenceCard>
+      </Box>
     </Box>
   );
 }
