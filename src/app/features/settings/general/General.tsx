@@ -297,7 +297,6 @@ function PageZoomInput() {
       value={currentZoom}
       onChange={handleZoomChange}
       onKeyDown={handleZoomEnter}
-      after={<Text size="T300">%</Text>}
       outlined
     />
   );

@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom, SetStateAction } from 'jotai';
 
 const STORAGE_KEY = 'settings';
 export type DateFormat =
@@ -27,7 +27,6 @@ export interface Settings {
   pageZoom: number;
   sendTypingNotifications: boolean;
   sendReadReceipts: boolean;
-  hideActivity: boolean;
 
   isPeopleDrawer: boolean;
   memberSortFilterIndex: number;
@@ -64,7 +63,6 @@ const defaultSettings: Settings = {
   pageZoom: 100,
   sendTypingNotifications: true,
   sendReadReceipts: true,
-  hideActivity: false,
 
   isPeopleDrawer: true,
   memberSortFilterIndex: 0,
@@ -89,36 +87,34 @@ const defaultSettings: Settings = {
   developerTools: false,
 };
 
-export const getSettings = () => {
+export const getSettings = (): Settings => {
   const settings = localStorage.getItem(STORAGE_KEY);
-  if (settings === null) return defaultSettings;
-  const parsedSettings = JSON.parse(settings) as Settings;
-
-  // Migration for hideActivity
-  if (parsedSettings.hideActivity !== undefined) {
-    if (parsedSettings.sendTypingNotifications === undefined) {
-      parsedSettings.sendTypingNotifications = !parsedSettings.hideActivity;
-    }
-    if (parsedSettings.sendReadReceipts === undefined) {
-      parsedSettings.sendReadReceipts = !parsedSettings.hideActivity;
-    }
+  if (settings === null || settings === 'undefined') return defaultSettings;
+  try {
+    const parsedSettings = JSON.parse(settings) as Settings;
+    if (!parsedSettings || typeof parsedSettings !== 'object') return defaultSettings;
+    return {
+      ...defaultSettings,
+      ...parsedSettings,
+    };
+  } catch (e) {
+    console.error('Failed to parse settings from localStorage', e);
+    return defaultSettings;
   }
-
-  return {
-    ...defaultSettings,
-    ...parsedSettings,
-  };
 };
 
 export const setSettings = (settings: Settings) => {
+  if (typeof settings !== 'object' || settings === null) return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
 };
 
 const baseSettings = atom<Settings>(getSettings());
-export const settingsAtom = atom<Settings, [Settings], undefined>(
+export const settingsAtom = atom<Settings, [SetStateAction<Settings>], void>(
   (get) => get(baseSettings),
   (get, set, update) => {
-    set(baseSettings, update);
-    setSettings(update);
+    const nextSettings = typeof update === 'function' ? update(get(baseSettings)) : update;
+    if (!nextSettings || typeof nextSettings !== 'object') return;
+    set(baseSettings, nextSettings);
+    setSettings(nextSettings);
   }
 );

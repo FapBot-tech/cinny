@@ -15,10 +15,13 @@ export const initClient = async (session: Session): Promise<MatrixClient> => {
   const indexedDBStore = new IndexedDBStore({
     indexedDB: global.indexedDB,
     localStorage: global.localStorage,
-    dbName: 'web-sync-store',
+    dbName: `sync-${session.userId}-${session.deviceId}`,
   });
 
-  const legacyCryptoStore = new IndexedDBCryptoStore(global.indexedDB, 'crypto-store');
+  const legacyCryptoStore = new IndexedDBCryptoStore(
+    global.indexedDB,
+    `crypto-${session.userId}-${session.deviceId}`
+  );
 
   const mx = createClient({
     baseUrl: session.baseUrl,
@@ -33,7 +36,9 @@ export const initClient = async (session: Session): Promise<MatrixClient> => {
   });
 
   await indexedDBStore.startup();
-  await mx.initRustCrypto();
+  await mx.initRustCrypto({
+    cryptoDatabasePrefix: `rust-crypto-${session.userId}-${session.deviceId}`,
+  });
 
   mx.setMaxListeners(50);
   const handleSuspended = (err: any) => {

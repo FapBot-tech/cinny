@@ -42,6 +42,7 @@ import { ErrorCode } from '../../cs-errorcode';
 import { UserDeactivatedDialog } from '../../components/UserDeactivatedDialog';
 import { isSuspendedAtom } from '../../state/userStatus';
 import { useSetAtom } from 'jotai';
+import { SettingsSync } from '../../components/SettingsSync';
 
 function ClientRootLoading() {
   return (
@@ -256,6 +257,7 @@ export function ClientRoot({ children }: ClientRootProps) {
             <ClientRootLoading />
           ) : (
             <MatrixClientProvider value={mx}>
+              <SettingsSync />
               <ServerConfigsLoader>
                 {(serverConfigs) => (
                   <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
