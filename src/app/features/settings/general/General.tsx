@@ -717,36 +717,38 @@ function Editor() {
   const [sendPresence, setSendPresence] = useSetting(settingsAtom, 'sendPresence');
 
   return (
-    <Box direction="Column" gap="1200">
-      <Text size="L400">Activity</Text>
-      <SequenceCard
-        className={SequenceCardStyle}
-        variant="SurfaceVariant"
-        direction="Column"
-        gap="400"
-      >
-        <SettingTile
-          title="Typing notifications"
-          description="Send and receive typing notifications."
-          after={
-            <Switch
-              variant="Primary"
-              value={sendTypingNotifications}
-              onChange={setSendTypingNotifications}
-            />
-          }
-        />
-        <SettingTile
-          title="Read receipts"
-          description="Send public read receipts. If disabled, you will still send private receipts to keep your own account in sync."
-          after={<Switch variant="Primary" value={sendReadReceipts} onChange={setSendReadReceipts} />}
-        />
-        <SettingTile
-          title="Status updates"
-          description="Send presence updates to the server. If disabled, you will always appear offline."
-          after={<Switch variant="Primary" value={sendPresence} onChange={setSendPresence} />}
-        />
-      </SequenceCard>
+    <Box direction="Column" gap="700">
+      <Box direction="Column" gap="100">
+        <Text size="L400">Activity</Text>
+        <SequenceCard
+          className={SequenceCardStyle}
+          variant="SurfaceVariant"
+          direction="Column"
+          gap="400"
+        >
+          <SettingTile
+            title="Typing notifications"
+            description="Send and receive typing notifications."
+            after={
+              <Switch
+                variant="Primary"
+                value={sendTypingNotifications}
+                onChange={setSendTypingNotifications}
+              />
+            }
+          />
+          <SettingTile
+            title="Read receipts"
+            description="Send public read receipts. If disabled, you will still send private receipts to keep your own account in sync."
+            after={<Switch variant="Primary" value={sendReadReceipts} onChange={setSendReadReceipts} />}
+          />
+          <SettingTile
+            title="Status updates"
+            description="Send presence updates to the server. If disabled, you will always appear offline."
+            after={<Switch variant="Primary" value={sendPresence} onChange={setSendPresence} />}
+          />
+        </SequenceCard>
+      </Box>
 
       <Box direction="Column" gap="100">
         <Text size="L400">Editor</Text>

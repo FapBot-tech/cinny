@@ -13,9 +13,9 @@ import {
   Spinner,
   Text,
 } from 'folds';
-import { HttpApiEvent, HttpApiEventHandlerMap, MatrixClient, MatrixError } from 'matrix-js-sdk';
+import { ClientEvent, HttpApiEvent, HttpApiEventHandlerMap, MatrixClient, MatrixError } from 'matrix-js-sdk';
 import FocusTrap from 'focus-trap-react';
-import React, { MouseEventHandler, ReactNode, useCallback, useEffect, useState } from 'react';
+import React, { MouseEventHandler, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   clearCacheAndReload,
   clearLoginData,
@@ -162,12 +162,34 @@ const useSuspendedListener = (mx?: MatrixClient) => {
 
 const usePresenceListener = (mx?: MatrixClient) => {
   const [sendPresence] = useSetting(settingsAtom, 'sendPresence');
+
   useEffect(() => {
-    if (mx && mx.clientRunning) {
-      const presence = sendPresence ? 'online' : 'offline';
-      mx.setPresence({ presence });
-      mx.setSyncPresence(presence);
-    }
+    if (!mx) return;
+
+    const updatePresence = () => {
+      if (mx.clientRunning) {
+        const presence = sendPresence ? 'online' : 'offline';
+        mx.setPresence({ presence });
+        mx.setSyncPresence(presence);
+      }
+    };
+
+    const handleSync = (state: string, prevState: string | null) => {
+      if (
+        (state === 'PREPARED' || state === 'SYNCING') &&
+        prevState !== 'PREPARED' &&
+        prevState !== 'SYNCING'
+      ) {
+        updatePresence();
+      }
+    };
+
+    mx.on(ClientEvent.Sync, handleSync);
+    updatePresence();
+
+    return () => {
+      mx.removeListener(ClientEvent.Sync, handleSync);
+    };
   }, [mx, sendPresence]);
 };
 

@@ -32,7 +32,7 @@ export const SettingsSync = () => {
   useEffect(() => {
     if (!mx) return;
 
-    const loadSettings = () => {
+    const loadSettings = (isFinalAttempt = false) => {
       const event = mx.getAccountData(SETTINGS_ACCOUNT_DATA_TYPE);
       if (event) {
         const remoteSettings = event.getContent() as Settings;
@@ -42,15 +42,30 @@ export const SettingsSync = () => {
         }
         setSettings((localSettings) => {
           if (!localSettings) return remoteSettings;
-          const newSettings = { ...localSettings, ...remoteSettings };
+          
+          // Merge remote settings into local settings, but keep local privacy settings
+          // until we are sure it has been synchronized or if it's the very first load.
+          const merged = { ...localSettings, ...remoteSettings };
+          if (isInitialLoad.current) {
+            merged.sendPresence = localSettings.sendPresence;
+            merged.sendTypingNotifications = localSettings.sendTypingNotifications;
+            merged.sendReadReceipts = localSettings.sendReadReceipts;
+          }
+          
           // If settings are identical, return the same object to avoid re-renders
-          if (JSON.stringify(localSettings) === JSON.stringify(newSettings)) {
+          if (JSON.stringify(localSettings) === JSON.stringify(merged)) {
             return localSettings;
           }
-          return newSettings;
+          return merged;
         });
+
+        // We only set isInitialLoad to false after the first successful merge
+        setTimeout(() => {
+          isInitialLoad.current = false;
+        }, 0);
+      } else if (isFinalAttempt) {
+        isInitialLoad.current = false;
       }
-      isInitialLoad.current = false;
     };
 
     const handleAccountData = (event: any) => {
@@ -61,11 +76,15 @@ export const SettingsSync = () => {
 
     mx.on(ClientEvent.AccountData, handleAccountData);
     if (mx.clientRunning) {
-      loadSettings();
+      loadSettings(true);
     } else {
-      mx.once(ClientEvent.Sync, (state) => {
-        if (state === 'PREPARED' || state === 'SYNCING') {
-          loadSettings();
+      mx.once(ClientEvent.Sync, (state, prevState) => {
+        if (
+          (state === 'PREPARED' || state === 'SYNCING') &&
+          prevState !== 'PREPARED' &&
+          prevState !== 'SYNCING'
+        ) {
+          loadSettings(true);
         }
       });
     }

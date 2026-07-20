@@ -53,7 +53,7 @@ export function CreateRoomTypeSelector({
         type="button"
         aria-pressed={value === CreateRoomType.VoiceRoom}
         onClick={() => onSelect(CreateRoomType.VoiceRoom)}
-        disabled={disabled}
+        disabled={true}
       >
         <SettingTile
           before={<Icon size="400" src={getIcon(CreateRoomType.VoiceRoom)} />}

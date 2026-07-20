@@ -85,7 +85,7 @@ export function CreateRoomForm({
 
   const [type, setType] = useState(defaultType ?? CreateRoomType.TextRoom);
   const [access, setAccess] = useState(
-    defaultAccess ?? (allowRestricted ? CreateRoomAccess.Restricted : CreateRoomAccess.Private)
+    defaultAccess ?? (allowRestricted ? CreateRoomAccess.Restricted : CreateRoomAccess.Public)
   );
   const allowAdditionalCreators = creatorsSupported(selectedRoomVersion);
   const { additionalCreators, addAdditionalCreator, removeAdditionalCreator } =
@@ -238,25 +238,6 @@ export function CreateRoomForm({
         )}
         {access !== CreateRoomAccess.Public && (
           <>
-            <SequenceCard
-              style={{ padding: config.space.S300 }}
-              variant="SurfaceVariant"
-              direction="Column"
-              gap="500"
-            >
-              <SettingTile
-                title="End-to-End Encryption"
-                description="Once this feature is enabled, it can't be disabled after the room is created."
-                after={
-                  <Switch
-                    variant="Primary"
-                    value={false}
-                    onChange={setEncryption}
-                    disabled={disabled}
-                  />
-                }
-              />
-            </SequenceCard>
             {advance && (allowKnock || allowKnockRestricted) && (
               <SequenceCard
                 style={{ padding: config.space.S300 }}
@@ -281,25 +262,6 @@ export function CreateRoomForm({
           </>
         )}
 
-        <SequenceCard
-          style={{ padding: config.space.S300 }}
-          variant="SurfaceVariant"
-          direction="Column"
-          gap="500"
-        >
-          <SettingTile
-            title="Allow Federation"
-            description="Users from other servers can join."
-            after={
-              <Switch
-                variant="Primary"
-                value={false}
-                onChange={setFederation}
-                disabled={disabled}
-              />
-            }
-          />
-        </SequenceCard>
         {advance && (
           <RoomVersionSelector
             versions={roomVersions?.available ? Object.keys(roomVersions.available) : ['1']}

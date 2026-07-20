@@ -268,7 +268,8 @@ export const getRoomIconSrc = (
     if (
       joinRule === JoinRule.Invite ||
       joinRule === JoinRule.Knock ||
-      joinRule === JoinRule.Private
+      joinRule === JoinRule.Private ||
+      joinRule === JoinRule.Restricted
     ) {
       return icons.SpaceLock;
     }
@@ -276,13 +277,14 @@ export const getRoomIconSrc = (
   }
 
   if (roomType === RoomType.Call) {
-    if (joinRule === JoinRule.Public) return icons.VolumeHighGlobe;
+    if (joinRule === JoinRule.Public) return icons.VolumeHighGlobe ?? icons.VolumeHigh;
     if (
       joinRule === JoinRule.Invite ||
       joinRule === JoinRule.Knock ||
-      joinRule === JoinRule.Private
+      joinRule === JoinRule.Private ||
+      joinRule === JoinRule.Restricted
     ) {
-      return icons.VolumeHighLock;
+      return icons.VolumeHighLock ?? icons.VolumeHigh;
     }
     return icons.VolumeHigh;
   }
@@ -291,7 +293,8 @@ export const getRoomIconSrc = (
   if (
     joinRule === JoinRule.Invite ||
     joinRule === JoinRule.Knock ||
-    joinRule === JoinRule.Private
+    joinRule === JoinRule.Private ||
+    joinRule === JoinRule.Restricted
   ) {
     return icons.HashLock;
   }
