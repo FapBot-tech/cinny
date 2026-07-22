@@ -114,20 +114,20 @@ export default defineConfig({
     vanillaExtractPlugin(),
     wasm(),
     react(),
-    VitePWA({
-      srcDir: 'src',
-      filename: 'sw.ts',
-      strategies: 'injectManifest',
-      injectRegister: false,
-      manifest: false,
-      injectManifest: {
-        injectionPoint: undefined,
-      },
-      devOptions: {
-        enabled: true,
-        type: 'module',
-      },
-    }),
+    // VitePWA({
+    //   srcDir: 'src',
+    //   filename: 'sw.ts',
+    //   strategies: 'injectManifest',
+    //   injectRegister: false,
+    //   manifest: false,
+    //   injectManifest: {
+    //     injectionPoint: undefined,
+    //   },
+    //   devOptions: {
+    //     enabled: true,
+    //     type: 'module',
+    //   },
+    // }),
   ],
   optimizeDeps: {
     esbuildOptions: {
@@ -148,7 +148,16 @@ export default defineConfig({
     sourcemap: true,
     copyPublicDir: false,
     rollupOptions: {
+      input: {
+        main: path.resolve('index.html'),
+        sw: path.resolve('src/sw.ts'),
+      },
       plugins: [inject({ Buffer: ['buffer', 'Buffer'] })],
+      output: {
+        entryFileNames: (chunkInfo) => {
+          return chunkInfo.name === 'sw' ? '[name].js' : 'assets/[name]-[hash].js';
+        },
+      },
     },
   },
 });
