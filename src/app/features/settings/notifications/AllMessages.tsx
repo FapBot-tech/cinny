@@ -108,43 +108,8 @@ export function AllMessagesNotifications() {
         gap="400"
       >
         <SettingTile
-          title="1-to-1 Chats (Encrypted)"
-          after={
-            <AllMessagesModeSwitcher
-              pushRules={pushRules}
-              ruleId={RuleId.EncryptedDM}
-              encrypted
-              oneToOne
-            />
-          }
-        />
-      </SequenceCard>
-      <SequenceCard
-        className={SequenceCardStyle}
-        variant="SurfaceVariant"
-        direction="Column"
-        gap="400"
-      >
-        <SettingTile
           title="Rooms"
           after={<AllMessagesModeSwitcher pushRules={pushRules} ruleId={RuleId.Message} />}
-        />
-      </SequenceCard>
-      <SequenceCard
-        className={SequenceCardStyle}
-        variant="SurfaceVariant"
-        direction="Column"
-        gap="400"
-      >
-        <SettingTile
-          title="Rooms (Encrypted)"
-          after={
-            <AllMessagesModeSwitcher
-              pushRules={pushRules}
-              ruleId={RuleId.EncryptedMessage}
-              encrypted
-            />
-          }
         />
       </SequenceCard>
     </Box>

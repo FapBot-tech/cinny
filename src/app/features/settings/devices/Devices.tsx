@@ -85,34 +85,6 @@ export function Devices({ requestClose }: DevicesProps) {
           <PageContent>
             <Box direction="Column" gap="700">
               <Box direction="Column" gap="100">
-                <Text size="L400">Security</Text>
-                <SequenceCard
-                  className={SequenceCardStyle}
-                  variant="SurfaceVariant"
-                  direction="Column"
-                  gap="400"
-                >
-                  <SettingTile
-                    title="Device Verification"
-                    description="To verify device identity and grant access to encrypted messages."
-                    after={
-                      <>
-                        <EnableVerification visible={!crossSigningActive} />
-                        {crossSigningActive && (
-                          <Box gap="200" alignItems="Center">
-                            <VerificationStatusBadge
-                              verificationStatus={verificationStatus}
-                              otherUnverifiedCount={unverifiedDeviceCount}
-                            />
-                            <DeviceVerificationOptions />
-                          </Box>
-                        )}
-                      </>
-                    }
-                  />
-                </SequenceCard>
-              </Box>
-              <Box direction="Column" gap="100">
                 <Text size="L400">Current</Text>
                 {currentDevice ? (
                   <SequenceCard

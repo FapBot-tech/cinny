@@ -995,12 +995,6 @@ function Messages() {
       </SequenceCard>
       <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
         <SettingTile
-          title="Url Preview in Encrypted Room"
-          after={<Switch variant="Primary" value={encUrlPreview} onChange={setEncUrlPreview} />}
-        />
-      </SequenceCard>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
           title="Show Hidden Events"
           after={
             <Switch variant="Primary" value={showHiddenEvents} onChange={setShowHiddenEvents} />
