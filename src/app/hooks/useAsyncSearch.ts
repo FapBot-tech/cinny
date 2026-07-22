@@ -112,8 +112,6 @@ export const useAsyncSearch = <TSearchItem extends object | string | number>(
   const [result, setResult] = useState<UseAsyncSearchResult<TSearchItem>>();
 
   const [searchCallback, terminateSearch] = useMemo(() => {
-    setResult(undefined);
-
     const handleMatch: MatchHandler<TSearchItem> = (item, query) => {
       const itemStr = getItemStr(item, query);
 
@@ -128,6 +126,10 @@ export const useAsyncSearch = <TSearchItem extends object | string | number>(
       });
 
     return AsyncSearch(list, handleMatch, handleResult, options);
+  }, [list, options, getItemStr]);
+
+  useEffect(() => {
+    setResult(undefined);
   }, [list, options, getItemStr]);
 
   const searchHandler: AsyncSearchHandler = useCallback(

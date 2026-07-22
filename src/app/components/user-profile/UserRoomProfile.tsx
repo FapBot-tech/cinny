@@ -67,7 +67,8 @@ export function UserRoomProfile({ userId }: UserRoomProfileProps) {
 
   const presence = useUserPresence(userId);
   const [extendedProfile] = useExtendedProfile(userId);
-  const genderId = extendedProfile?.[AccountDataEvent.CinnyGender] ?? '';
+  const genderData = (extendedProfile as any)?.[AccountDataEvent.CinnyGender];
+  const genderId = typeof genderData === 'string' ? genderData : genderData?.gender ?? '';
   const gender = genderId
     ? genderId.charAt(0).toUpperCase() + genderId.slice(1).replace(/-/g, ' ')
     : undefined;

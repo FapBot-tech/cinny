@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { color, config, DefaultReset, Disabled, FocusOutline } from 'folds';
+import { color, config, DefaultReset, Disabled, FocusOutline, toRem } from 'folds';
 
 export const MemberTile = style([
   DefaultReset,
@@ -30,3 +30,8 @@ export const MemberTile = style([
   FocusOutline,
   Disabled,
 ]);
+
+export const GenderIcon = style({
+  width: toRem(12),
+  height: toRem(12),
+});

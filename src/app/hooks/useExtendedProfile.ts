@@ -17,7 +17,7 @@ const extendedProfile = z.looseObject({
         .array()
         .optional()
         .catch(undefined),
-    'im.cinny.gender': z.string().optional().catch(undefined),
+    'in.cinny.gender': z.string().optional().catch(undefined),
     'in.cinny.about_me': z.string().optional().catch(undefined),
     'us.cloke.msc4175.tz': z.string().optional().catch(undefined),
 });

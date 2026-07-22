@@ -327,13 +327,6 @@ export function Members({ requestClose }: MembersProps) {
                             room={room}
                             member={tagOrMember}
                             useAuthentication={useAuthentication}
-                            after={
-                              server && (
-                                <Box as="span" shrink="No" alignSelf="End">
-                                  <ServerBadge server={server} fill="None" />
-                                </Box>
-                              )
-                            }
                           />
                         </div>
                       </VirtualTile>

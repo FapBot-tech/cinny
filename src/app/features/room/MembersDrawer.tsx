@@ -59,23 +59,25 @@ import { useSpaceOptionally } from '../../hooks/useSpace';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { useFlattenPowerTagMembers, useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
-import { AccountDataEvent } from '../../../types/matrix/accountData';
-import { useAccountData } from '../../hooks/useAccountData';
+import { useUserPresence, Presence } from '../../hooks/useUserPresence';
+import { AvatarPresence, PresenceBadge } from '../../components/presence';
 import { useExtendedProfile } from '../../hooks/useExtendedProfile';
 import { getGenderAbbreviation, getGenderIcon } from '../../utils/gender';
+import { AccountDataEvent } from '../../../types/matrix/accountData';
 
 type MemberDrawerHeaderProps = {
-  room: Room;
+  count: number;
+  label: string;
 };
-function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
+function MemberDrawerHeader({ count, label }: MemberDrawerHeaderProps) {
   const setPeopleDrawer = useSetSetting(settingsAtom, 'isPeopleDrawer');
 
   return (
     <Header className={css.MembersDrawerHeader} variant="Background" size="600">
       <Box grow="Yes" alignItems="Center" gap="200">
         <Box grow="Yes" alignItems="Center" gap="200">
-          <Text title={`${room.getJoinedMemberCount()} Members`} size="H5" truncate>
-            {`${millify(room.getJoinedMemberCount())} Members`}
+          <Text title={`${count} ${label}`} size="H5" truncate>
+            {`${millify(count)} ${label}`}
           </Text>
         </Box>
         <Box shrink="No" alignItems="Center">
@@ -124,7 +126,9 @@ function MemberItem({
   typing,
 }: MemberItemProps) {
   const [extendedProfile] = useExtendedProfile(member.userId);
-  const genderId = extendedProfile?.[AccountDataEvent.CinnyGender] ?? ''
+  const presence = useUserPresence(member.userId);
+  const genderData = (extendedProfile as any)?.[AccountDataEvent.CinnyGender];
+  const genderId = typeof genderData === 'string' ? genderData : genderData?.gender ?? '';
 
   const name =
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;
@@ -142,14 +146,22 @@ function MemberItem({
       radii="400"
       onClick={onClick}
       before={
-        <Avatar size="200">
-          <UserAvatar
-            userId={member.userId}
-            src={avatarUrl ?? undefined}
-            alt={name}
-            renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-          />
-        </Avatar>
+        <AvatarPresence
+          badge={
+            presence?.presence === Presence.Online && (
+              <PresenceBadge presence={presence.presence} size="200" />
+            )
+          }
+        >
+          <Avatar size="200">
+            <UserAvatar
+              userId={member.userId}
+              src={avatarUrl ?? undefined}
+              alt={name}
+              renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+            />
+          </Avatar>
+        </AvatarPresence>
       }
       after={
         typing && (
@@ -168,7 +180,7 @@ function MemberItem({
             <Text size="T200" priority="300" variant="Secondary">
               {getGenderAbbreviation(genderId)}
             </Text>
-            <Icon className={css.GenderIcon} src={Icons.User} priority="300" />
+            <Icon className={css.GenderIcon} src={getGenderIcon(genderId)} priority="300" />
           </Box>
         )}
       </Box>
@@ -262,13 +274,18 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
     openUserRoomProfile(room.roomId, space?.roomId, userId, btn.getBoundingClientRect(), 'Left');
   };
 
+  const headerLabel =
+    membershipFilter.name === 'Joined' ? 'Members' : `${membershipFilter.name} Members`;
+  const headerCount =
+    membershipFilter.name === 'Joined' ? room.getJoinedMemberCount() : filteredMembers.length;
+
   return (
     <Box
       className={classNames(css.MembersDrawer, ContainerColor({ variant: 'Background' }))}
       shrink="No"
       direction="Column"
     >
-      <MemberDrawerHeader room={room} />
+      <MemberDrawerHeader count={headerCount} label={headerLabel} />
       <Box className={css.MemberDrawerContentBase} grow="Yes">
         <Scroll ref={scrollRef} variant="Background" size="300" visibility="Hover" hideTrack>
           <Box className={css.MemberDrawerContent} direction="Column" gap="200">
